@@ -17,10 +17,10 @@ input[type="email"],
 input[type="number"],
 input[type="text"],
 select, textarea {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 15px;
     box-sizing: border-box;
+    margin-bottom: 15px;
+    padding: 8px;
+    width: 100%;
 }
 
 label {
