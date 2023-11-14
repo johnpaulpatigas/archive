@@ -1,0 +1,44 @@
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.5;
+    margin: auto;
+    max-width: 800px;
+    padding: 20px;
+}
+
+#image {
+    display: block;
+    height: auto;
+    margin: auto;
+    max-width: 100%;
+}
+
+#img-caption {
+    font-style: italic;
+    margin-top: 10px;
+}
+
+#img-div {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#tribute-info {
+    font-size: 16px;
+    margin-bottom: 20px;
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+#tribute-link {
+    display: block;
+    margin-bottom: 10px;
+    text-align: center;
+}
