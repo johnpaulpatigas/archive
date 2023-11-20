@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REAPER Landing Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header id="header">
+        <img alt="Reaper Logo" id="header-img" src="img/logo.png">
+        <nav id="nav-bar">
+            <a class="nav-link" href="#features">Features</a>
+            <a class="nav-link" href="#demo">Demo</a>
+            <a class="nav-link" href="#pricing">Pricing</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="section" id="features">
+            <h2>Discover the Power of REAPER</h2>
+            <div class="feature">
+                <img alt="Customizable UI" src="img/logo.png">
+                <h3>Customizable User Interface</h3>
+                <p>Create your ideal workspace tailored to your workflow.</p>
+            </div>
+            <div class="feature">
+                <img alt="Audio Tools" src="img/logo.png">
+                <h3>Powerful Audio Recording and Editing Tools</h3>
+                <p>Edit audio with precision and flexibility.</p>
+            </div>
+            <div class="feature">
+                <img alt="MIDI Capabilities" src="img/logo.png">
+                <h3>Versatile MIDI Capabilities</h3>
+                <p>Enhance your music production with comprehensive MIDI features.</p>
+            </div>
+        </section>
+
+        <section class="section" id="demo">
+            <h2>REAPER in Action</h2>
+            <div class="video-container">
+                <iframe frameborder="0" id="video" src="https://www.youtube.com/embed/A0c-_YyuUts"></iframe>
+            </div>
+        </section>
+
+        <section class="section" id="pricing">
+            <h2>Choose Your Plan</h2>
+            <div class="pricing">
+                <div class="plan">
+                    <h3>Free Trial</h3>
+                    <p>Experience all features for free for 60 days.</p>
+                </div>
+                <div class="plan">
+                    <h3>Single License</h3>
+                    <p>Unlock Reaper for personal use at $60.</p>
+                </div>
+                <div class="plan">
+                    <h3>Commercial License</h3>
+                    <p>For commercial use at $225.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="contact">
+            <h2>Stay Updated</h2>
+            <p>Subscribe to our newsletter for the latest news and updates!</p>
+            <form id="form" action="https://www.freecodecamp.com/email-submit" method="post">
+                <input id="email" name="email" placeholder="Enter your email" type="email" required>
+                <input id="submit" type="submit" value="Subscribe">
+            </form>
+        </section>
+    </main>
+</body>
+</html>
