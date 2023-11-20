@@ -21,9 +21,11 @@ body {
 #navbar {
     background-color: #333;
     padding: 20px;
-    position: fixed;
+    left: 0;
+    position: sticky;
     text-align: center;
-    width: 100%;
+    top: 0;
+    width: auto;
     z-index: 999;
 }
 
