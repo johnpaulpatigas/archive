@@ -1,0 +1,16 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+input[type="text"], input[type="password"], input[type="submit"] {
+    margin: 10px 0;
+    padding: 8px;
+    width: calc(100% - 16px);
+}
+.login-container {
+    margin: 100px auto;
+    width: 300px;
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 5px;
+}
