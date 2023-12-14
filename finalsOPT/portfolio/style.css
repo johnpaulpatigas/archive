@@ -76,3 +76,23 @@ img {
 #skills a {
     text-decoration: none;
 }
+
+#about h1 {
+    overflow: hidden;
+    border-right: .15em solid orange;
+    white-space: nowrap;
+    width: 0;
+    animation: 
+    typing 1.2s steps(17, end) forwards,
+    blink .8s infinite;
+}
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 22% }
+}
+
+@keyframes blink {
+    from { border-color: transparent }
+    to { border-color: orange; }
+}
