@@ -4,10 +4,10 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
 	var username = document.getElementById("username").value
 	var password = document.getElementById("password").value
 
-	var validUsername = "user"
-	var validPassword = "1234"
+	var username = "user"
+	var password = "1234"
 
-	if (username === validUsername && password === validPassword) {
+	if (username === username && password === password) {
 		document.getElementById("message").innerHTML = "Login successful!"
 		window.location.href = "portfolio/index.html";
   	} else {
