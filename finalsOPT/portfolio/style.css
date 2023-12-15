@@ -6,19 +6,24 @@
 body {
     font-family: 'Segoe UI', sans-serif;
     line-height: 1.5;
-    background-color: #f9f9f9;
+    background-color: #f5f5f5;
     color: #333;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
 }
 
 header {
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
+    width: fit-content;
+    position: sticky;
+    top: 0;
+    left: 0;
 }
 
 nav ul {
     list-style: none;
-    padding-left: 80px;
+    padding-left: 60px;
 }
 
 nav ul li {
@@ -37,7 +42,9 @@ nav ul li a:hover {
 }
 
 section {
-    padding: 50px 100px;
+    padding: 100px 80px;
+    position: relative;
+    display: inline-block;
 }
 
 h1 {
@@ -89,31 +96,4 @@ p {
 @keyframes blink {
     from { border-color: transparent }
     to { border-color: orange }
-}
-
-.gallery {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-img {
-    width: 100%;
-    max-width: 560px;
-    border-radius: 20px;
-    margin-right: 10px;
-    margin-bottom: 10px;
-}
-
-.video-container {
-    position: relative;
-overflow: hidden;
-}
-
-.video-container iframe {
-    width: 540px;
-    height: 315px;
-    border-radius: 20px;
 }
