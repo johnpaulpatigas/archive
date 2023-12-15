@@ -1,6 +1,6 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f9f9f9;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -31,7 +31,7 @@ input[type="submit"] {
 }
 
 input[type="submit"] {
-    background-color: #4CAF50;
+    background-color: #FFA500;
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -39,11 +39,11 @@ input[type="submit"] {
 }
 
 input[type="submit"]:hover {
-    background-color: #45a049;
+    background-color: #FF6347;
 }
 
 #message {
-    color: red;
+    color: #FF6347;
     font-style: italic;
 }
 

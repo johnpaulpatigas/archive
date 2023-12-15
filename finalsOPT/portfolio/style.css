@@ -1,15 +1,13 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
     line-height: 1.5;
     background-color: #f9f9f9;
     color: #333;
-    margin: 0;
 }
 
 header {
@@ -66,33 +64,56 @@ p {
     color: #333;
 }
 
-
-img {
-    width: 60%;
-    border-radius: 20px;
-    margin-bottom: 10px;
-}
-
 #skills a {
     text-decoration: none;
+    color: #FFA500;
+    transition: color 0.3s ease;
+}
+
+#skills a:hover {
+    color: #FF6347;
 }
 
 #about h1 {
     overflow: hidden;
     border-right: .15em solid orange;
     white-space: nowrap;
-    width: 0;
-    animation: 
-    typing 1.2s steps(17, end) forwards,
-    blink .8s infinite;
+    animation: typing 1s steps(17, end) forwards, blink 1s infinite;
 }
 
 @keyframes typing {
     from { width: 0 }
-    to { width: 22% }
+    to { width: 305px }
 }
 
 @keyframes blink {
     from { border-color: transparent }
-    to { border-color: orange; }
+    to { border-color: orange }
+}
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+img {
+    width: 100%;
+    max-width: 560px;
+    border-radius: 20px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.video-container {
+    position: relative;
+overflow: hidden;
+}
+
+.video-container iframe {
+    width: 540px;
+    height: 315px;
+    border-radius: 20px;
 }
