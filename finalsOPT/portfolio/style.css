@@ -15,7 +15,7 @@ body {
 
 header {
     padding: 20px;
-    width: fit-content;
+    width: 10%;
     position: sticky;
     top: 0;
     left: 0;
@@ -96,4 +96,19 @@ p {
 @keyframes blink {
     from { border-color: transparent }
     to { border-color: orange }
+}
+
+img {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 20px;
+    margin-right: 10px;
+}
+
+.video-container iframe {
+    border-radius: 20px;
+}
+
+.music-container iframe {
+    border-radius: 20px;
 }
