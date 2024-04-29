@@ -32,3 +32,11 @@ function removeTask(task) {
   const taskItem = document.querySelector(`[data-title="${task.title}"]`);
   taskList.removeChild(taskItem);
 }
+
+function saveTask(task) {
+  const taskItem = createTaskItem(task);
+  taskItem.dataset.title = task.title;
+  taskList.appendChild(taskItem);
+
+  taskForm.reset();
+}
