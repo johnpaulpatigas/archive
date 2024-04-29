@@ -29,16 +29,33 @@ function createTaskItem(task) {
 }
 
 function removeTask(task) {
+  if (typeof localStorage !== "undefined") {
+    localStorage.removeItem(task.title);
+  }
+
   const taskItem = document.querySelector(`[data-title="${task.title}"]`);
   taskList.removeChild(taskItem);
 }
 
 function saveTask(task) {
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem(task.title, JSON.stringify(task));
+  }
+
   const taskItem = createTaskItem(task);
   taskItem.dataset.title = task.title;
   taskList.appendChild(taskItem);
 
   taskForm.reset();
+}
+
+const storedTasks = JSON.parse(localStorage.getItem("tasks"));
+
+if (storedTasks && typeof localStorage !== "undefined") {
+  storedTasks.forEach((task) => {
+    const taskItem = createTaskItem(task);
+    taskList.appendChild(taskItem);
+  });
 }
 
 taskForm.addEventListener("submit", (event) => {
