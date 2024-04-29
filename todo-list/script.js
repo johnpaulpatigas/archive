@@ -40,3 +40,17 @@ function saveTask(task) {
 
   taskForm.reset();
 }
+
+taskForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const title = document.getElementById("task-title").value.trim();
+  const description = document.getElementById("task-description").value.trim();
+
+  if (title && description) {
+    const newTask = { title, description };
+    saveTask(newTask);
+  } else {
+    alert("Please enter both title and description!");
+  }
+});
