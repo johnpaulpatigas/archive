@@ -27,3 +27,8 @@ function createTaskItem(task) {
 
   return li;
 }
+
+function removeTask(task) {
+  const taskItem = document.querySelector(`[data-title="${task.title}"]`);
+  taskList.removeChild(taskItem);
+}
