@@ -5,36 +5,23 @@ function createTaskItem(task) {
     const li = document.createElement("li");
     li.className = "list-group-item";
 
-    const title = document.createElement("h5");
-    title.innerText = task.title;
-
-    const description = document.createElement("p");
-    description.innerText = task.description;
-
-    const savedDate = document.createElement("span");
-    savedDate.classList.add("text-muted");
-    savedDate.innerText = `Saved: ${new Date().toLocaleDateString()}`;
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.classList.add("btn", "btn-sm", "btn-danger", "float-end");
-    deleteBtn.innerText = "Delete";
-    deleteBtn.addEventListener("click", () => removeTask(task));
-
-    li.appendChild(title);
-    li.appendChild(description);
-    li.appendChild(savedDate);
-    li.appendChild(deleteBtn);
+    li.innerHTML = `
+        <h5>${task.title}</h5>
+        <p>${task.description}</p>
+        <span class="text-muted">Saved: ${new Date().toLocaleDateString()}</span>
+        <button class="btn btn-sm btn-danger float-end delete-btn">Delete</button>
+    `;
 
     return li;
 }
 
-function removeTask(task) {
+function removeTask(taskTitle) {
     if (typeof localStorage !== "undefined") {
-        localStorage.removeItem(task.title);
+        localStorage.removeItem(taskTitle);
     }
 
-    const taskItem = document.querySelector(`[data-title="${task.title}"]`);
-    taskList.removeChild(taskItem);
+    const taskItem = document.querySelector(`[data-title="${taskTitle}"]`);
+    taskItem.remove();
 }
 
 function saveTask(task) {
@@ -49,13 +36,39 @@ function saveTask(task) {
     taskForm.reset();
 }
 
-const storedTasks = JSON.parse(localStorage.getItem("tasks"));
+taskList.addEventListener("click", (event) => {
+    if (event.target.classList.contains("delete-btn")) {
+        const taskTitle = event.target.parentNode.dataset.title;
+        removeTask(taskTitle);
+    }
+});
 
-if (storedTasks && typeof localStorage !== "undefined") {
-    storedTasks.forEach((task) => {
-        const taskItem = createTaskItem(task);
-        taskList.appendChild(taskItem);
-    });
+function checkLocalStorage() {
+    try {
+        const testKey = "__testKey__";
+        localStorage.setItem(testKey, testKey);
+        localStorage.removeItem(testKey);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function loadTasks() {
+    if (typeof localStorage !== "undefined") {
+        const storedTasks = JSON.parse(localStorage.getItem("tasks"));
+        if (storedTasks) {
+            storedTasks.forEach((task) => {
+                saveTask(task);
+            });
+        }
+    }
+}
+
+if (checkLocalStorage()) {
+    loadTasks();
+} else {
+    console.error("LocalStorage is not supported. Task data won't be saved.");
 }
 
 taskForm.addEventListener("submit", (event) => {
