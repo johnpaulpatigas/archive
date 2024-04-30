@@ -17,7 +17,9 @@ function createTaskItem(task) {
 
 function removeTask(taskTitle) {
     if (typeof localStorage !== "undefined") {
-        localStorage.removeItem(taskTitle);
+        let storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        storedTasks = storedTasks.filter((task) => task.title !== taskTitle);
+        localStorage.setItem("tasks", JSON.stringify(storedTasks));
     }
 
     const taskItem = document.querySelector(`[data-title="${taskTitle}"]`);
