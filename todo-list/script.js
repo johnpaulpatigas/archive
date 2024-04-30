@@ -26,14 +26,16 @@ function removeTask(taskTitle) {
 
 function saveTask(task) {
     if (typeof localStorage !== "undefined") {
-        localStorage.setItem(task.title, JSON.stringify(task));
+        let storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        storedTasks.push(task);
+        localStorage.setItem("tasks", JSON.stringify(storedTasks));
+        console.log("Task saved:", task);
+        console.log("All tasks:", storedTasks);
     }
 
     const taskItem = createTaskItem(task);
     taskItem.dataset.title = task.title;
     taskList.appendChild(taskItem);
-
-    taskForm.reset();
 }
 
 taskList.addEventListener("click", (event) => {
@@ -56,12 +58,12 @@ function checkLocalStorage() {
 
 function loadTasks() {
     if (typeof localStorage !== "undefined") {
-        const storedTasks = JSON.parse(localStorage.getItem("tasks"));
-        if (storedTasks) {
-            storedTasks.forEach((task) => {
-                saveTask(task);
-            });
-        }
+        const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        storedTasks.forEach((task) => {
+            const taskItem = createTaskItem(task);
+            taskItem.dataset.title = task.title;
+            taskList.appendChild(taskItem);
+        });
     }
 }
 
@@ -82,6 +84,7 @@ taskForm.addEventListener("submit", (event) => {
     if (title && description) {
         const newTask = { title, description };
         saveTask(newTask);
+        taskForm.reset();
     } else {
         alert("Please enter both title and description!");
     }
