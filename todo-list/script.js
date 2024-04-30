@@ -29,8 +29,6 @@ function saveTask(task) {
         let storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
         storedTasks.push(task);
         localStorage.setItem("tasks", JSON.stringify(storedTasks));
-        console.log("Task saved:", task);
-        console.log("All tasks:", storedTasks);
     }
 
     const taskItem = createTaskItem(task);
