@@ -16,22 +16,18 @@ function createTaskItem(task) {
 }
 
 function removeTask(taskTitle) {
-    if (typeof localStorage !== "undefined") {
-        let storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-        storedTasks = storedTasks.filter((task) => task.title !== taskTitle);
-        localStorage.setItem("tasks", JSON.stringify(storedTasks));
-    }
+    let storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    storedTasks = storedTasks.filter((task) => task.title !== taskTitle);
+    localStorage.setItem("tasks", JSON.stringify(storedTasks));
 
     const taskItem = document.querySelector(`[data-title="${taskTitle}"]`);
     taskItem.remove();
 }
 
 function saveTask(task) {
-    if (typeof localStorage !== "undefined") {
-        let storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-        storedTasks.push(task);
-        localStorage.setItem("tasks", JSON.stringify(storedTasks));
-    }
+    let storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    storedTasks.push(task);
+    localStorage.setItem("tasks", JSON.stringify(storedTasks));
 
     const taskItem = createTaskItem(task);
     taskItem.dataset.title = task.title;
@@ -45,33 +41,16 @@ taskList.addEventListener("click", (event) => {
     }
 });
 
-function checkLocalStorage() {
-    try {
-        const testKey = "__testKey__";
-        localStorage.setItem(testKey, testKey);
-        localStorage.removeItem(testKey);
-        return true;
-    } catch (e) {
-        return false;
-    }
-}
-
 function loadTasks() {
-    if (typeof localStorage !== "undefined") {
-        const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-        storedTasks.forEach((task) => {
-            const taskItem = createTaskItem(task);
-            taskItem.dataset.title = task.title;
-            taskList.appendChild(taskItem);
-        });
-    }
+    const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    storedTasks.forEach((task) => {
+        const taskItem = createTaskItem(task);
+        taskItem.dataset.title = task.title;
+        taskList.appendChild(taskItem);
+    });
 }
 
-if (checkLocalStorage()) {
-    loadTasks();
-} else {
-    console.error("LocalStorage is not supported. Task data won't be saved.");
-}
+loadTasks();
 
 taskForm.addEventListener("submit", (event) => {
     event.preventDefault();
