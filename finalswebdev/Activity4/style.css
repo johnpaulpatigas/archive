@@ -1,0 +1,25 @@
+body {
+    align-items: center;
+    background-color: #242943;
+    display: flex;
+    font-family: 'Segoe UI', sans-serif;
+    height: 100vh;
+    justify-content: center;
+    margin: 0;
+}
+
+#clock {
+    animation: glow 3s infinite alternate;
+    color: #fff;
+    font-size: 2em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    to {
+        text-shadow: 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff00ff, 0 0 70px #ff00ff, 0 0 80px #ff00ff, 0 0 100px #ff00ff, 0 0 150px #ff00ff;
+    }
+}

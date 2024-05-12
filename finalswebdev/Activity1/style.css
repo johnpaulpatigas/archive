@@ -1,0 +1,46 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    line-height: 1.5;
+    margin: 30px;
+}
+
+fieldset {
+    margin-bottom: 15px;
+}
+
+h1, p {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+input[type="email"],
+input[type="number"],
+input[type="text"],
+select, textarea {
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    padding: 8px;
+    width: 100%;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+#submit {
+    background-color: #0060df;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 10px 15px;
+}
+
+#submit:hover {
+    background-color: #2374ff;
+}
+
+#survey-form {
+    margin: auto;
+    max-width: 600px;
+}
