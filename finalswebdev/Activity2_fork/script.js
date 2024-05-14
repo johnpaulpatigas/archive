@@ -27,10 +27,8 @@ function check() {
             display();
             document.getElementById("feedback-correct").textContent =
                 "Correct! Next question...";
+            document.getElementById("feedback-wrong").textContent = "";
             document.getElementById("answer").classList.add("is-valid");
-            document
-                .getElementById("feedback-correct")
-                .classList.add("text-success");
         }
     } else {
         display();
@@ -38,7 +36,6 @@ function check() {
         document.getElementById("feedback-wrong").textContent =
             "Incorrect. Please try again.";
         document.getElementById("answer").classList.add("is-invalid");
-        document.getElementById("feedback-wrong").classList.add("text-danger");
     }
     document.getElementById("answer").value = "";
 }
