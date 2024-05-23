@@ -27,6 +27,16 @@
         opacity: 0.9;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       }
+      #About {
+        margin-top: 5rem;
+      }
+      footer .col-md-4 {
+        margin-bottom: 1.5rem;
+      }
+      #cpc{
+        width: 4rem;
+        border-radius: 50%;
+      }
     </style>
   </head>
   <body>
@@ -47,15 +57,13 @@
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item ms-3">
-              <a href="index.html" class="nav-link fw-semibold text-light"
-                >Home</a
-              >
+              <a class="nav-link fw-semibold text-light" href="#carouselExampleIndicators">Home</a>
             </li>
             <li class="nav-item ms-3">
-              <a href="#about" class="nav-link fw-semibold text-light">About</a>
+              <a href="#About" class="nav-link fw-semibold text-light">About</a>
             </li>
             <li class="nav-item ms-3">
-              <a href="#contact" class="nav-link fw-semibold text-light"
+              <a href="#Contact" class="nav-link fw-semibold text-light"
                 >Contact</a
               >
             </li>
@@ -174,16 +182,21 @@
         <span class="visually-hidden">Next</span>
       </button>
     </div>
+    </div>
+
+    <div class="container-fluid m-5"  id="About">
+       <!-- ari lang i butang ngano nahitabo ug ngano na form ang word na poblacion, history etc. --> 
+    </div>
 
     <div class="container mb-5">
-      <h1 class="text-center" style="font-size: 3rem">
+      <h1 class="text-center mb-5" style="font-size: 3rem">
         LET'S EXPLORE POBLACION!
       </h1>
     </div>
 
     <div class="row">
       <div class="col-sm">
-        <div class="container mb-5" style="width: 45vh">
+        <div class="container mb-5" style="width: 90%">
           <div class="card m-auto rounded-4">
             <div id="carouselExample" class="carousel slide">
               <div class="carousel-inner rounded-top-4">
@@ -226,12 +239,15 @@
               <h3 class="card-text text-center" style="font-size: 1.5rem">
                 Cordova Fire Station
               </h3>
+              <h6>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora temporibus laborum dignissimos itaque amet exercitationem quibusdam accusantium eius dolorum repudiandae. Velit odit, quo illo rem consectetur nihil eligendi porro magni.
+              </h6> <!-- Please ko change -->
             </div>
           </div>
         </div>
       </div>
       <div class="col-sm">
-        <div class="container mb-5" style="width: 45vh">
+        <div class="container mb-5" style="width: 90%">
           <div class="card m-auto rounded-4">
             <div id="carouselExample1" class="carousel slide">
               <div class="carousel-inner rounded-top-4">
@@ -271,13 +287,16 @@
               <h3 class="card-text text-center" style="font-size: 1.5rem">
                 Cordova Police Station
               </h3>
+              <h6>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora temporibus laborum dignissimos itaque amet exercitationem quibusdam accusantium eius dolorum repudiandae. Velit odit, quo illo rem consectetur nihil eligendi porro magni.
+              </h6> <!-- Please ko change -->
             </div>
           </div>
         </div>
       </div>
 
       <div class="col-sm">
-        <div class="container mb-5" style="width: 45vh">
+        <div class="container mb-5"  style="width: 90%">
           <div class="card m-auto rounded-4">
             <div id="carouselExample2" class="carousel slide">
               <div class="carousel-inner rounded-top-4">
@@ -323,11 +342,40 @@
               <h3 class="card-text text-center" style="font-size: 1.5rem">
                 Cordova Barangay Hall
               </h3>
+              <h6>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora temporibus laborum dignissimos itaque amet exercitationem quibusdam accusantium eius dolorum repudiandae. Velit odit, quo illo rem consectetur nihil eligendi porro magni.
+              </h6>   <!-- Please ko change -->
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <footer class="bg-dark text-light py-4 mt-5" id="Contact">
+        <div class="container">
+          <div class="row text-center">
+            <div class="col-md-4 mx-auto">
+              <h5>Contact Us</h5>
+              <p class="mb-1">Phone:</p>    <!-- UNSAY NUMBER NILA -->
+              <p>Email:</p>    <!-- WABALO EMAIL -->
+            </div>
+            <div class="col-md-4 mx-auto">
+                <h5> Cordova Public College</h5>
+                <img src="img/cpc.jpg" id="cpc">
+              </div>
+            <div class="col-md-4 mx-auto">
+              <h5>Follow Us</h5>
+              <a href="https://www.facebook.com/SKCordovaPoblacion" target="_blank" class="text-light me-3"><i class="fab fa-facebook"></i></a>
+              <a href="https://www.instagram.com/skpoblacioncordova/" target="_blank" class="text-light"><i class="fab fa-instagram"></i></a>     <!-- Footer Section -->
+            </div>
+          </div>
+          <div class="text-center mt-3">
+            <p>&copy; FATHERBOARD | BSIT - 1C</p>
+          </div>
+        </div>
+      </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" defer></script>
     <script>
       const navbar = document.querySelector('.navbar');
       ['scroll', 'resize', 'DOMContentLoaded'].forEach((e) =>
