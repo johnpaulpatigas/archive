@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>SEIR Simulation</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            @media (max-width: 720px) {
+                #simulationCanvas,
+                #chartCanvas {
+                    width: 100% !important;
+                    height: auto !important;
+                }
+            }
+        </style>
+    </head>
+    <body class="font-sans">
+        <div class="max-w-screen-lg mx-auto p-8">
+            <div class="navbar bg-base-100 mb-4">
+                <div class="flex-1">
+                    <a class="font-bold text-2xl">SEIR Simulation</a>
+                </div>
+                <div class="flex-none">
+                    <label class="swap swap-rotate">
+                        <input
+                            type="checkbox"
+                            class="theme-controller"
+                            value="dark"
+                        />
+                        <svg
+                            class="swap-off h-10 w-10 fill-current"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"
+                            />
+                        </svg>
+                        <svg
+                            class="swap-on h-10 w-10 fill-current"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"
+                            />
+                        </svg>
+                    </label>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-center gap-8 mb-8">
+                <canvas
+                    id="simulationCanvas"
+                    class="border-2 border-gray-300 rounded-lg shadow-md"
+                    width="500"
+                    height="500"
+                ></canvas>
+                <canvas
+                    id="chartCanvas"
+                    class="border-2 border-gray-300 rounded-lg shadow-md"
+                    width="505"
+                    height="505"
+                ></canvas>
+            </div>
+            <div id="controls" class="flex justify-center mb-8">
+                <button
+                    id="startBtn"
+                    class="btn btn-outline btn-neutral py-2 px-4 hover:scale-110 text-lg mr-8 w-24"
+                >
+                    Start
+                </button>
+                <button
+                    id="resetBtn"
+                    class="btn btn-outline btn-neutral py-2 px-4 hover:scale-110 text-lg w-24"
+                >
+                    Reset
+                </button>
+            </div>
+            <div id="stats" class="text-lg font-bold text-center mb-8"></div>
+            <div id="parameters" class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div class="flex flex-col">
+                    <label class="font-medium text-base"
+                        >Population Size:</label
+                    >
+                    <input
+                        type="range"
+                        id="populationSize"
+                        min="100"
+                        max="1000"
+                        step="10"
+                        class="range"
+                    />
+                    <span id="populationSizeValue" class="font-medium text-base"
+                        >100</span
+                    >
+                </div>
+                <div class="flex flex-col">
+                    <label class="font-medium text-base"
+                        >Initial Infected:</label
+                    >
+                    <input
+                        type="range"
+                        id="initialInfected"
+                        min="1"
+                        max="100"
+                        class="range"
+                    />
+                    <span
+                        id="initialInfectedValue"
+                        class="font-medium text-base"
+                        >10</span
+                    >
+                </div>
+                <div class="flex flex-col">
+                    <label class="font-medium text-base"
+                        >Transmission Rate (%):</label
+                    >
+                    <input
+                        type="range"
+                        id="transmissionRate"
+                        min="0"
+                        max="100"
+                        class="range"
+                    />
+                    <span
+                        id="transmissionRateValue"
+                        class="font-medium text-base"
+                        >30%</span
+                    >
+                </div>
+                <div class="flex flex-col">
+                    <label class="font-medium text-base"
+                        >Incubation Period (days):</label
+                    >
+                    <input
+                        type="range"
+                        id="incubationPeriod"
+                        min="1"
+                        max="30"
+                        class="range"
+                    />
+                    <span
+                        id="incubationPeriodValue"
+                        class="font-medium text-base"
+                        >14</span
+                    >
+                </div>
+                <div class="flex flex-col">
+                    <label class="font-medium text-base"
+                        >Infectious Period (days):</label
+                    >
+                    <input
+                        type="range"
+                        id="infectiousPeriod"
+                        min="1"
+                        max="60"
+                        class="range"
+                    />
+                    <span
+                        id="infectiousPeriodValue"
+                        class="font-medium text-base"
+                        >14</span
+                    >
+                </div>
+                <div class="flex flex-col">
+                    <label class="font-medium text-base"
+                        >Recovery Rate (%):</label
+                    >
+                    <input
+                        type="range"
+                        id="recoveryRate"
+                        min="0"
+                        max="100"
+                        class="range"
+                    />
+                    <span id="recoveryRateValue" class="font-medium text-base"
+                        >95%</span
+                    >
+                </div>
+                <div class="flex flex-col">
+                    <label class="font-medium text-base">Movement Range:</label>
+                    <input
+                        type="range"
+                        id="movementRange"
+                        min="1"
+                        max="10"
+                        class="range"
+                    />
+                    <span id="movementRangeValue" class="font-medium text-base"
+                        >5</span
+                    >
+                </div>
+                <div class="flex flex-col">
+                    <label class="font-medium text-base"
+                        >Simulation Speed (ms):</label
+                    >
+                    <input
+                        type="range"
+                        id="simulationSpeed"
+                        min="100"
+                        max="5000"
+                        step="100"
+                        class="range"
+                    />
+                    <span
+                        id="simulationSpeedValue"
+                        class="font-medium text-base"
+                        >500</span
+                    >
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const canvas = document.getElementById("simulationCanvas");
+            const ctx = canvas.getContext("2d");
+            const chartCanvas = document.getElementById("chartCanvas");
+            const chartCtx = chartCanvas.getContext("2d");
+            const startBtn = document.getElementById("startBtn");
+            const resetBtn = document.getElementById("resetBtn");
+            const statsDiv = document.getElementById("stats");
+
+            let agents = [];
+            let isRunning = false;
+            let dayCounter = 0;
+            let chart;
+
+            const sliders = [
+                { id: "populationSize", value: "populationSizeValue" },
+                { id: "initialInfected", value: "initialInfectedValue" },
+                {
+                    id: "transmissionRate",
+                    value: "transmissionRateValue",
+                    percentage: true,
+                },
+                { id: "incubationPeriod", value: "incubationPeriodValue" },
+                { id: "infectiousPeriod", value: "infectiousPeriodValue" },
+                {
+                    id: "recoveryRate",
+                    value: "recoveryRateValue",
+                    percentage: true,
+                },
+                { id: "movementRange", value: "movementRangeValue" },
+                { id: "simulationSpeed", value: "simulationSpeedValue" },
+            ];
+
+            sliders.forEach((slider) => {
+                const input = document.getElementById(slider.id);
+                const display = document.getElementById(slider.value);
+                input.addEventListener("input", () => {
+                    display.textContent = slider.percentage
+                        ? `${input.value}%`
+                        : input.value;
+
+                    updateSimulationParameters();
+                });
+            });
+
+            function updateSimulationParameters() {
+                const transmissionRate =
+                    parseFloat(
+                        document.getElementById("transmissionRate").value
+                    ) / 100;
+                const incubationPeriod = parseInt(
+                    document.getElementById("incubationPeriod").value
+                );
+                const infectiousPeriod = parseInt(
+                    document.getElementById("infectiousPeriod").value
+                );
+                const recoveryRate =
+                    parseFloat(document.getElementById("recoveryRate").value) /
+                    100;
+                const movementRange = parseFloat(
+                    document.getElementById("movementRange").value
+                );
+
+                initializeAgents();
+                drawSimulation();
+                updateStats();
+            }
+
+            class Agent {
+                constructor(x, y, state) {
+                    this.x = x;
+                    this.y = y;
+                    this.state = state;
+                    this.daysInState = 0;
+                }
+
+                move(range) {
+                    this.x = Math.max(
+                        0,
+                        Math.min(
+                            canvas.width,
+                            this.x + (Math.random() - 0.5) * range
+                        )
+                    );
+                    this.y = Math.max(
+                        0,
+                        Math.min(
+                            canvas.height,
+                            this.y + (Math.random() - 0.5) * range
+                        )
+                    );
+                }
+
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                    ctx.fillStyle = ["blue", "yellow", "red", "green"][
+                        this.state
+                    ];
+                    ctx.fill();
+                }
+            }
+
+            function initializeAgents() {
+                const populationSize = parseInt(
+                    document.getElementById("populationSize").value
+                );
+                const initialInfected = parseInt(
+                    document.getElementById("initialInfected").value
+                );
+                agents = Array.from({ length: populationSize }, (_, i) => {
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * canvas.height;
+                    const state = i < initialInfected ? 2 : 0;
+                    return new Agent(x, y, state);
+                });
+            }
+
+            function updateSimulation() {
+                const transmissionRate =
+                    parseFloat(
+                        document.getElementById("transmissionRate").value
+                    ) / 100;
+                const incubationPeriod = parseInt(
+                    document.getElementById("incubationPeriod").value
+                );
+                const infectiousPeriod = parseInt(
+                    document.getElementById("infectiousPeriod").value
+                );
+                const recoveryRate =
+                    parseFloat(document.getElementById("recoveryRate").value) /
+                    100;
+                const movementRange = parseFloat(
+                    document.getElementById("movementRange").value
+                );
+
+                agents.forEach((agent) => {
+                    agent.move(movementRange);
+                    agent.daysInState++;
+                    if (
+                        agent.state === 1 &&
+                        agent.daysInState >= incubationPeriod
+                    ) {
+                        agent.state = 2;
+                        agent.daysInState = 0;
+                    } else if (
+                        agent.state === 2 &&
+                        agent.daysInState >= infectiousPeriod
+                    ) {
+                        if (Math.random() < recoveryRate) {
+                            agent.state = 3;
+                            agent.daysInState = 0;
+                        }
+                    }
+                });
+
+                agents.forEach((agent) => {
+                    if (agent.state === 2) {
+                        agents.forEach((other) => {
+                            if (other.state === 0) {
+                                const distance = Math.sqrt(
+                                    (agent.x - other.x) ** 2 +
+                                        (agent.y - other.y) ** 2
+                                );
+                                if (
+                                    Math.random() <
+                                    Math.min(
+                                        1,
+                                        transmissionRate / (distance + 1)
+                                    )
+                                ) {
+                                    other.state = 1;
+                                    other.daysInState = 0;
+                                }
+                            }
+                        });
+                    }
+                });
+
+                dayCounter++;
+            }
+
+            function drawSimulation() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                agents.forEach((agent) => agent.draw());
+            }
+
+            function updateStats() {
+                const counts = agents.reduce(
+                    (acc, agent) => {
+                        acc[agent.state]++;
+                        return acc;
+                    },
+                    [0, 0, 0, 0]
+                );
+
+                statsDiv.innerHTML = `Day: ${dayCounter}, Susceptible: ${counts[0]}, Exposed: ${counts[1]}, Infectious: ${counts[2]}, Recovered: ${counts[3]}`;
+                updateChart(counts);
+            }
+
+            function updateChart(counts) {
+                if (!chart) {
+                    chart = new Chart(chartCtx, {
+                        type: "line",
+                        data: {
+                            labels: [],
+                            datasets: [
+                                {
+                                    label: "Susceptible",
+                                    data: [],
+                                    borderColor: "blue",
+                                    fill: false,
+                                },
+                                {
+                                    label: "Exposed",
+                                    data: [],
+                                    borderColor: "yellow",
+                                    fill: false,
+                                },
+                                {
+                                    label: "Infectious",
+                                    data: [],
+                                    borderColor: "red",
+                                    fill: false,
+                                },
+                                {
+                                    label: "Recovered",
+                                    data: [],
+                                    borderColor: "green",
+                                    fill: false,
+                                },
+                            ],
+                        },
+                        options: {
+                            responsive: false,
+                            scales: {
+                                x: {
+                                    type: "linear",
+                                    position: "bottom",
+                                    title: { display: true, text: "Days" },
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: "Population",
+                                    },
+                                },
+                            },
+                        },
+                    });
+                }
+
+                chart.data.labels.push(dayCounter);
+                chart.data.datasets.forEach((dataset, i) => {
+                    dataset.data.push(counts[i]);
+                });
+                chart.update();
+            }
+
+            function runSimulation() {
+                if (isRunning) {
+                    updateSimulation();
+                    drawSimulation();
+                    updateStats();
+                    setTimeout(
+                        runSimulation,
+                        parseInt(
+                            document.getElementById("simulationSpeed").value
+                        )
+                    );
+                }
+            }
+
+            function resetSimulation() {
+                isRunning = false;
+                startBtn.textContent = "Start";
+                dayCounter = 0;
+
+                const defaultValues = {
+                    populationSize: 100,
+                    initialInfected: 10,
+                    transmissionRate: 30,
+                    incubationPeriod: 14,
+                    infectiousPeriod: 14,
+                    recoveryRate: 95,
+                    movementRange: 5,
+                    simulationSpeed: 500,
+                };
+
+                Object.entries(defaultValues).forEach(([key, value]) => {
+                    const input = document.getElementById(key);
+                    input.value = value;
+                    document.getElementById(`${key}Value`).textContent =
+                        key.includes("Rate") ? `${value}%` : value;
+                });
+
+                initializeAgents();
+                drawSimulation();
+                updateStats();
+                resetChart();
+            }
+
+            function resetChart() {
+                if (chart) {
+                    chart.data.labels = [];
+                    chart.data.datasets.forEach(
+                        (dataset) => (dataset.data = [])
+                    );
+                    chart.update();
+                }
+            }
+
+            startBtn.addEventListener("click", () => {
+                isRunning = !isRunning;
+                startBtn.textContent = isRunning ? "Pause" : "Resume";
+                if (isRunning) runSimulation();
+            });
+
+            resetBtn.addEventListener("click", resetSimulation);
+            resetSimulation();
+        </script>
+    </body>
+</html>
