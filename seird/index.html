@@ -370,7 +370,7 @@
       }
 
       let csvData = [
-        ["day", "susceptible", "exposed", "infectious", "recovered"],
+        ["day", "susceptible", "exposed", "infectious", "recovered", "deaths"],
       ];
 
       function captureData(counts) {
@@ -492,8 +492,16 @@
         isRunning = false;
         startBtn.textContent = "Start";
         dayCounter = 0;
+        deathCount = 0;
         csvData = [
-          ["day", "susceptible", "exposed", "infectious", "recovered"],
+          [
+            "day",
+            "susceptible",
+            "exposed",
+            "infectious",
+            "recovered",
+            "deaths",
+          ],
         ];
 
         const defaultValues = {
