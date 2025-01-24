@@ -204,10 +204,19 @@
         document.getElementById("restrictMovement");
 
       let agents = [];
+      let chart;
       let isRunning = false;
       let dayCounter = 0;
       let deathCount = 0;
-      let chart;
+      let deathsYoung = 0;
+      let deathsAdult = 0;
+      let deathsSenior = 0;
+
+      const ageGroups = [
+        { min: 0, max: 17, multiplier: 0.2, label: "Young" },
+        { min: 18, max: 64, multiplier: 1, label: "Adult" },
+        { min: 65, max: 100, multiplier: 4, label: "Senior" },
+      ];
 
       const sliders = [
         { id: "populationSize", value: "populationSizeValue" },
@@ -266,6 +275,10 @@
           this.y = y;
           this.state = state;
           this.daysInState = 0;
+          this.age = Math.floor(Math.random() * 100);
+          this.ageGroup = ageGroups.find(
+            (g) => this.age >= g.min && this.age <= g.max
+          );
         }
 
         move(range) {
@@ -332,12 +345,21 @@
             agent.state === 2 &&
             agent.daysInState >= infectiousPeriod
           ) {
-            if (Math.random() < recoveryRate) {
-              agent.state = 3;
-              agent.daysInState = 0;
-            } else if (Math.random() < deathRate) {
+            const baseDeathRate = 1 - recoveryRate;
+            const deathProbability = Math.min(
+              baseDeathRate * agent.ageGroup.multiplier,
+              1
+            );
+
+            if (Math.random() < deathProbability) {
               agent.state = 4;
               deathCount++;
+              if (agent.age <= 17) deathsYoung++;
+              else if (agent.age <= 64) deathsAdult++;
+              else deathsSenior++;
+              agent.daysInState = 0;
+            } else {
+              agent.state = 3;
               agent.daysInState = 0;
             }
           }
@@ -370,11 +392,31 @@
       }
 
       let csvData = [
-        ["day", "susceptible", "exposed", "infectious", "recovered", "deaths"],
+        [
+          "day",
+          "susceptible",
+          "exposed",
+          "infectious",
+          "recovered",
+          "deaths",
+          "deathsYoung",
+          "deathsAdult",
+          "deathsSenior",
+        ],
       ];
 
       function captureData(counts) {
-        csvData.push([dayCounter, counts[0], counts[1], counts[2], counts[3]]);
+        csvData.push([
+          dayCounter,
+          counts[0],
+          counts[1],
+          counts[2],
+          counts[3],
+          counts[4],
+          deathsYoung,
+          deathsAdult,
+          deathsSenior,
+        ]);
       }
 
       function downloadCSV() {
@@ -405,7 +447,10 @@
           [0, 0, 0, 0, 0]
         );
 
-        statsDiv.innerHTML = `Day: ${dayCounter}, Susceptible: ${counts[0]}, Exposed: ${counts[1]}, Infectious: ${counts[2]}, Recovered: ${counts[3]}, Deaths: ${deathCount}`;
+        statsDiv.innerHTML = `
+          Day: ${dayCounter}, Susceptible: ${counts[0]}, Exposed: ${counts[1]}, Infectious: ${counts[2]}, Recovered: ${counts[3]}, Deaths: ${deathCount}<br>
+          Deaths by Age - Young: ${deathsYoung}, Adult: ${deathsAdult}, Senior: ${deathsSenior}
+        `;
         updateChart(counts);
         captureData(counts);
       }
@@ -493,6 +538,9 @@
         startBtn.textContent = "Start";
         dayCounter = 0;
         deathCount = 0;
+        deathsYoung = 0;
+        deathsAdult = 0;
+        deathsSenior = 0;
         csvData = [
           [
             "day",
