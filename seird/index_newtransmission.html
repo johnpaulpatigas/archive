@@ -87,30 +87,13 @@
                         <span
                             id="initialInfectedValue"
                             class="font-medium text-base"
-                            >10</span
+                            >20</span
                         ></label
                     >
                     <input
                         type="range"
                         id="initialInfected"
                         min="1"
-                        max="100"
-                        class="range"
-                    />
-                </div>
-                <div class="flex flex-col">
-                    <label class="font-medium text-base"
-                        >Transmission Rate:
-                        <span
-                            id="transmissionRateValue"
-                            class="font-medium text-base"
-                            >30%</span
-                        ></label
-                    >
-                    <input
-                        type="range"
-                        id="transmissionRate"
-                        min="0"
                         max="100"
                         class="range"
                     />
@@ -155,7 +138,7 @@
                         <span
                             id="recoveryRateValue"
                             class="font-medium text-base"
-                            >95%</span
+                            >100%</span
                         ></label
                     >
                     <input
@@ -172,7 +155,7 @@
                         <span
                             id="movementRangeValue"
                             class="font-medium text-base"
-                            >5</span
+                            >10</span
                         ></label
                     >
                     <input
@@ -243,11 +226,6 @@
             const sliders = [
                 { id: "populationSize", value: "populationSizeValue" },
                 { id: "initialInfected", value: "initialInfectedValue" },
-                {
-                    id: "transmissionRate",
-                    value: "transmissionRateValue",
-                    percentage: true,
-                },
                 { id: "incubationPeriod", value: "incubationPeriodValue" },
                 { id: "infectiousPeriod", value: "infectiousPeriodValue" },
                 {
@@ -272,10 +250,6 @@
             });
 
             function updateSimulationParameters() {
-                const transmissionRate =
-                    parseFloat(
-                        document.getElementById("transmissionRate").value,
-                    ) / 100;
                 const incubationPeriod = parseInt(
                     document.getElementById("incubationPeriod").value,
                 );
@@ -352,11 +326,19 @@
                 });
             }
 
+            function getTransmissionRate(age) {
+                if (age === 1) return 0.0141;
+                if (age >= 1 && age <= 10) return 0.1408;
+                if (age >= 11 && age <= 20) return 0.2253;
+                if (age >= 21 && age <= 30) return 0.2676;
+                if (age >= 31 && age <= 40) return 0.1267;
+                if (age >= 41 && age <= 50) return 0.1126;
+                if (age >= 51 && age <= 60) return 0.0704;
+                if (age >= 61) return 0.0563;
+                return 0.0141;
+            }
+
             function updateSimulation() {
-                const transmissionRate =
-                    parseFloat(
-                        document.getElementById("transmissionRate").value,
-                    ) / 100;
                 const incubationPeriod = parseInt(
                     document.getElementById("incubationPeriod").value,
                 );
@@ -412,15 +394,15 @@
                                     (agent.x - other.x) ** 2 +
                                         (agent.y - other.y) ** 2,
                                 );
-                                if (
-                                    Math.random() <
-                                    Math.min(
-                                        1,
-                                        transmissionRate / (distance + 1),
-                                    )
-                                ) {
-                                    other.state = 1;
-                                    other.daysInState = 0;
+
+                                if (distance <= 6) {
+                                    const transmitterRate = getTransmissionRate(
+                                        agent.age,
+                                    );
+                                    if (Math.random() < transmitterRate) {
+                                        other.state = 1;
+                                        other.daysInState = 0;
+                                    }
                                 }
                             }
                         });
@@ -443,9 +425,6 @@
                     "infectious",
                     "recovered",
                     "deaths",
-                    "deathsYoung",
-                    "deathsAdult",
-                    "deathsSenior",
                 ],
             ];
 
@@ -457,9 +436,6 @@
                     counts[2],
                     counts[3],
                     counts[4],
-                    deathsYoung,
-                    deathsAdult,
-                    deathsSenior,
                 ]);
             }
 
@@ -598,12 +574,11 @@
 
                 const defaultValues = {
                     populationSize: 100,
-                    initialInfected: 10,
-                    transmissionRate: 30,
+                    initialInfected: 20,
                     incubationPeriod: 14,
                     infectiousPeriod: 14,
-                    recoveryRate: 95,
-                    movementRange: 5,
+                    recoveryRate: 100,
+                    movementRange: 10,
                     simulationSpeed: 500,
                 };
 

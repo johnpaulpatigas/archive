@@ -412,15 +412,17 @@
                                     (agent.x - other.x) ** 2 +
                                         (agent.y - other.y) ** 2,
                                 );
-                                if (
-                                    Math.random() <
-                                    Math.min(
-                                        1,
-                                        transmissionRate / (distance + 1),
-                                    )
-                                ) {
-                                    other.state = 1;
-                                    other.daysInState = 0;
+                                if (distance < 6) {
+                                    if (
+                                        Math.random() <
+                                        Math.min(
+                                            1,
+                                            transmissionRate / (distance + 1),
+                                        )
+                                    ) {
+                                        other.state = 1;
+                                        other.daysInState = 0;
+                                    }
                                 }
                             }
                         });
