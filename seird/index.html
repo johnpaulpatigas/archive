@@ -69,7 +69,7 @@
                         <span
                             id="populationSizeValue"
                             class="font-medium text-base"
-                            >100</span
+                            >200</span
                         ></label
                     >
                     <input
@@ -87,7 +87,7 @@
                         <span
                             id="initialInfectedValue"
                             class="font-medium text-base"
-                            >10</span
+                            >20</span
                         ></label
                     >
                     <input
@@ -104,7 +104,7 @@
                         <span
                             id="transmissionRateValue"
                             class="font-medium text-base"
-                            >30%</span
+                            >40%</span
                         ></label
                     >
                     <input
@@ -155,7 +155,7 @@
                         <span
                             id="recoveryRateValue"
                             class="font-medium text-base"
-                            >95%</span
+                            >100%</span
                         ></label
                     >
                     <input
@@ -172,7 +172,7 @@
                         <span
                             id="movementRangeValue"
                             class="font-medium text-base"
-                            >5</span
+                            >10</span
                         ></label
                     >
                     <input
@@ -366,7 +366,6 @@
                 const recoveryRate =
                     parseFloat(document.getElementById("recoveryRate").value) /
                     100;
-                const deathRate = 1 - recoveryRate;
                 const movementRange = parseFloat(
                     document.getElementById("movementRange").value,
                 );
@@ -384,46 +383,40 @@
                         agent.state === 2 &&
                         agent.daysInState >= infectiousPeriod
                     ) {
-                        const baseDeathRate = 1 - recoveryRate;
-                        const deathProbability = Math.min(
-                            baseDeathRate * agent.ageGroup.multiplier,
-                            1,
-                        );
-
-                        if (Math.random() < deathProbability) {
-                            agent.state = 4;
+                        const deathProbability =
+                            (1 - recoveryRate) * agent.ageGroup.multiplier;
+                        agent.state = Math.random() < deathProbability ? 4 : 3;
+                        if (agent.state === 4) {
                             deathCount++;
                             if (agent.age <= 17) deathsYoung++;
                             else if (agent.age <= 64) deathsAdult++;
                             else deathsSenior++;
-                            agent.daysInState = 0;
-                        } else {
-                            agent.state = 3;
-                            agent.daysInState = 0;
                         }
+                        agent.daysInState = 0;
                     }
                 });
 
-                agents.forEach((agent) => {
-                    if (agent.state === 2) {
-                        agents.forEach((other) => {
-                            if (other.state === 0) {
-                                const distance = Math.sqrt(
-                                    (agent.x - other.x) ** 2 +
-                                        (agent.y - other.y) ** 2,
-                                );
-                                if (
-                                    Math.random() <
-                                    Math.min(
-                                        1,
-                                        transmissionRate / (distance + 1),
-                                    )
-                                ) {
-                                    other.state = 1;
-                                    other.daysInState = 0;
+                agents.forEach((susceptible) => {
+                    if (susceptible.state === 0) {
+                        let totalRisk = 1;
+                        agents.forEach((infectious) => {
+                            if (infectious.state === 2) {
+                                const dx = infectious.x - susceptible.x;
+                                const dy = infectious.y - susceptible.y;
+                                const distance = Math.sqrt(dx * dx + dy * dy);
+                                if (distance < 12) {
+                                    const proximityFactor = 1 / (distance + 1);
+                                    const p_i =
+                                        transmissionRate * proximityFactor;
+                                    totalRisk *= 1 - p_i;
                                 }
                             }
                         });
+                        const infectionProbability = 1 - totalRisk;
+                        if (Math.random() < infectionProbability) {
+                            susceptible.state = 1;
+                            susceptible.daysInState = 0;
+                        }
                     }
                 });
 
@@ -597,13 +590,13 @@
                 ];
 
                 const defaultValues = {
-                    populationSize: 100,
-                    initialInfected: 10,
-                    transmissionRate: 30,
+                    populationSize: 200,
+                    initialInfected: 20,
+                    transmissionRate: 40,
                     incubationPeriod: 14,
                     infectiousPeriod: 14,
-                    recoveryRate: 95,
-                    movementRange: 5,
+                    recoveryRate: 100,
+                    movementRange: 10,
                     simulationSpeed: 500,
                 };
 
