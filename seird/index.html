@@ -65,140 +65,106 @@
             <div id="parameters" class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div class="flex flex-col">
                     <label class="font-medium text-base"
-                        >Population Size:
-                        <span
-                            id="populationSizeValue"
-                            class="font-medium text-base"
-                            >200</span
-                        ></label
+                        >Population Size:</label
                     >
                     <input
-                        type="range"
+                        type="number"
                         id="populationSize"
                         min="50"
                         max="500"
                         step="10"
-                        class="range"
+                        class="input input-bordered"
+                        value="200"
                     />
                 </div>
                 <div class="flex flex-col">
                     <label class="font-medium text-base"
-                        >Initial Infected:
-                        <span
-                            id="initialInfectedValue"
-                            class="font-medium text-base"
-                            >20</span
-                        ></label
+                        >Initial Infected:</label
                     >
                     <input
-                        type="range"
+                        type="number"
                         id="initialInfected"
                         min="1"
                         max="100"
-                        class="range"
+                        class="input input-bordered"
+                        value="20"
                     />
                 </div>
                 <div class="flex flex-col">
                     <label class="font-medium text-base"
-                        >Transmission Rate:
-                        <span
-                            id="transmissionRateValue"
-                            class="font-medium text-base"
-                            >40%</span
-                        ></label
+                        >Transmission Rate (%):</label
                     >
                     <input
-                        type="range"
+                        type="number"
                         id="transmissionRate"
                         min="0"
                         max="100"
-                        class="range"
+                        class="input input-bordered"
+                        value="40"
                     />
                 </div>
                 <div class="flex flex-col">
                     <label class="font-medium text-base"
-                        >Incubation Period (days):
-                        <span
-                            id="incubationPeriodValue"
-                            class="font-medium text-base"
-                            >14</span
-                        >
-                    </label>
+                        >Incubation Period (days):</label
+                    >
                     <input
-                        type="range"
+                        type="number"
                         id="incubationPeriod"
                         min="1"
                         max="30"
-                        class="range"
+                        class="input input-bordered"
+                        value="14"
                     />
                 </div>
                 <div class="flex flex-col">
                     <label class="font-medium text-base"
-                        >Infectious Period (days):
-                        <span
-                            id="infectiousPeriodValue"
-                            class="font-medium text-base"
-                            >14</span
-                        ></label
+                        >Infectious Period (days):</label
                     >
                     <input
-                        type="range"
+                        type="number"
                         id="infectiousPeriod"
                         min="1"
                         max="60"
-                        class="range"
+                        class="input input-bordered"
+                        value="14"
                     />
                 </div>
                 <div class="flex flex-col">
                     <label class="font-medium text-base"
-                        >Recovery Rate:
-                        <span
-                            id="recoveryRateValue"
-                            class="font-medium text-base"
-                            >100%</span
-                        ></label
+                        >Recovery Rate (%):</label
                     >
                     <input
-                        type="range"
+                        type="number"
                         id="recoveryRate"
                         min="0"
                         max="100"
-                        class="range"
+                        class="input input-bordered"
+                        value="100"
                     />
                 </div>
                 <div class="flex flex-col">
-                    <label class="font-medium text-base"
-                        >Movement Range:
-                        <span
-                            id="movementRangeValue"
-                            class="font-medium text-base"
-                            >10</span
-                        ></label
-                    >
+                    <label class="font-medium text-base">Movement Range:</label>
                     <input
-                        type="range"
+                        type="number"
                         id="movementRange"
                         min="1"
                         max="10"
-                        class="range"
+                        class="input input-bordered"
+                        value="10"
                     />
                 </div>
                 <div class="flex flex-col">
                     <label class="font-medium text-base"
-                        >Simulation Speed (ms):
-                        <span
-                            id="simulationSpeedValue"
-                            class="font-medium text-base"
-                            >500</span
-                        ></label
+                        >Simulation Speed (ms):</label
                     >
                     <input
-                        type="range"
+                        type="number"
                         id="simulationSpeed"
                         min="100"
                         max="1000"
                         step="100"
-                        class="range"
+                        class="input input-bordered"
+                        value="500"
                     />
                 </div>
                 <div class="flex items-center gap-2">
@@ -230,9 +196,6 @@
             let isRunning = false;
             let dayCounter = 0;
             let deathCount = 0;
-            let deathsYoung = 0;
-            let deathsAdult = 0;
-            let deathsSenior = 0;
 
             const ageGroups = [
                 { min: 0, max: 17, multiplier: 0.2, label: "Young" },
@@ -240,55 +203,24 @@
                 { min: 65, max: 100, multiplier: 4, label: "Senior" },
             ];
 
-            const sliders = [
-                { id: "populationSize", value: "populationSizeValue" },
-                { id: "initialInfected", value: "initialInfectedValue" },
-                {
-                    id: "transmissionRate",
-                    value: "transmissionRateValue",
-                    percentage: true,
-                },
-                { id: "incubationPeriod", value: "incubationPeriodValue" },
-                { id: "infectiousPeriod", value: "infectiousPeriodValue" },
-                {
-                    id: "recoveryRate",
-                    value: "recoveryRateValue",
-                    percentage: true,
-                },
-                { id: "movementRange", value: "movementRangeValue" },
-                { id: "simulationSpeed", value: "simulationSpeedValue" },
+            const parameters = [
+                "populationSize",
+                "initialInfected",
+                "transmissionRate",
+                "incubationPeriod",
+                "infectiousPeriod",
+                "recoveryRate",
+                "movementRange",
+                "simulationSpeed",
             ];
 
-            sliders.forEach((slider) => {
-                const input = document.getElementById(slider.id);
-                const display = document.getElementById(slider.value);
-                input.addEventListener("input", () => {
-                    display.textContent = slider.percentage
-                        ? `${input.value}%`
-                        : input.value;
-
-                    updateSimulationParameters();
-                });
+            parameters.forEach((id) => {
+                document
+                    .getElementById(id)
+                    .addEventListener("input", updateSimulationParameters);
             });
 
             function updateSimulationParameters() {
-                const transmissionRate =
-                    parseFloat(
-                        document.getElementById("transmissionRate").value,
-                    ) / 100;
-                const incubationPeriod = parseInt(
-                    document.getElementById("incubationPeriod").value,
-                );
-                const infectiousPeriod = parseInt(
-                    document.getElementById("infectiousPeriod").value,
-                );
-                const recoveryRate =
-                    parseFloat(document.getElementById("recoveryRate").value) /
-                    100;
-                const movementRange = parseFloat(
-                    document.getElementById("movementRange").value,
-                );
-
                 initializeAgents();
                 drawSimulation();
                 updateStats();
@@ -388,9 +320,6 @@
                         agent.state = Math.random() < deathProbability ? 4 : 3;
                         if (agent.state === 4) {
                             deathCount++;
-                            if (agent.age <= 17) deathsYoung++;
-                            else if (agent.age <= 64) deathsAdult++;
-                            else deathsSenior++;
                         }
                         agent.daysInState = 0;
                     }
@@ -436,9 +365,6 @@
                     "infectious",
                     "recovered",
                     "deaths",
-                    "deathsYoung",
-                    "deathsAdult",
-                    "deathsSenior",
                 ],
             ];
 
@@ -450,9 +376,6 @@
                     counts[2],
                     counts[3],
                     counts[4],
-                    deathsYoung,
-                    deathsAdult,
-                    deathsSenior,
                 ]);
             }
 
@@ -575,9 +498,6 @@
                 startBtn.textContent = "Start";
                 dayCounter = 0;
                 deathCount = 0;
-                deathsYoung = 0;
-                deathsAdult = 0;
-                deathsSenior = 0;
                 csvData = [
                     [
                         "day",
@@ -588,26 +508,6 @@
                         "deaths",
                     ],
                 ];
-
-                const defaultValues = {
-                    populationSize: 200,
-                    initialInfected: 20,
-                    transmissionRate: 40,
-                    incubationPeriod: 14,
-                    infectiousPeriod: 14,
-                    recoveryRate: 100,
-                    movementRange: 10,
-                    simulationSpeed: 500,
-                };
-
-                restrictMovementToggle.checked = false;
-
-                Object.entries(defaultValues).forEach(([key, value]) => {
-                    const input = document.getElementById(key);
-                    input.value = value;
-                    document.getElementById(`${key}Value`).textContent =
-                        key.includes("Rate") ? `${value}%` : value;
-                });
 
                 initializeAgents();
                 drawSimulation();
