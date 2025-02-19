@@ -326,21 +326,21 @@
 
                 agents.forEach((susceptible) => {
                     if (susceptible.state === 0) {
-                        let totalRisk = 1;
+                        let survivalProbability = 1;
                         agents.forEach((infectious) => {
                             if (infectious.state === 2) {
                                 const dx = infectious.x - susceptible.x;
                                 const dy = infectious.y - susceptible.y;
                                 const distance = Math.sqrt(dx * dx + dy * dy);
-                                if (distance < 8) {
-                                    const proximityFactor = 1 / (distance + 1);
-                                    const p_i =
-                                        transmissionRate * proximityFactor;
-                                    totalRisk *= 1 - p_i;
-                                }
+                                const decayConstant = 4;
+                                const p_i =
+                                    transmissionRate *
+                                    Math.exp(-distance / decayConstant);
+
+                                survivalProbability *= 1 - p_i;
                             }
                         });
-                        const infectionProbability = 1 - totalRisk;
+                        const infectionProbability = 1 - survivalProbability;
                         if (Math.random() < infectionProbability) {
                             susceptible.state = 1;
                             susceptible.daysInState = 0;
