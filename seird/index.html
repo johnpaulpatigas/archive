@@ -236,6 +236,8 @@
                     this.ageGroup = ageGroups.find(
                         (g) => this.age >= g.min && this.age <= g.max,
                     );
+                    this.targetX = Math.random() * canvas.width;
+                    this.targetY = Math.random() * canvas.height;
                 }
 
                 move(range) {
@@ -243,22 +245,19 @@
                         return;
                     if (this.state === 4) return;
 
-                    this.x = Math.max(
-                        0,
-                        Math.min(
-                            canvas.width,
-                            this.x + (Math.random() - 0.5) * range,
-                        ),
-                    );
-                    this.y = Math.max(
-                        0,
-                        Math.min(
-                            canvas.height,
-                            this.y + (Math.random() - 0.5) * range,
-                        ),
-                    );
-                }
+                    let dx = this.targetX - this.x;
+                    let dy = this.targetY - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
 
+                    if (distance < 5) {
+                        this.targetX = Math.random() * canvas.width;
+                        this.targetY = Math.random() * canvas.height;
+                    } else {
+                        let step = range;
+                        this.x += (dx / distance) * step;
+                        this.y += (dy / distance) * step;
+                    }
+                }
                 draw() {
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
