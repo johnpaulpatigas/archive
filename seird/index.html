@@ -105,32 +105,6 @@
                 </div>
                 <div class="flex flex-col">
                     <label class="font-medium text-base"
-                        >Incubation Period (days):</label
-                    >
-                    <input
-                        type="number"
-                        id="incubationPeriod"
-                        min="1"
-                        max="30"
-                        class="input input-bordered"
-                        value="14"
-                    />
-                </div>
-                <div class="flex flex-col">
-                    <label class="font-medium text-base"
-                        >Infectious Period (days):</label
-                    >
-                    <input
-                        type="number"
-                        id="infectiousPeriod"
-                        min="1"
-                        max="60"
-                        class="input input-bordered"
-                        value="14"
-                    />
-                </div>
-                <div class="flex flex-col">
-                    <label class="font-medium text-base"
                         >Recovery Rate (%):</label
                     >
                     <input
@@ -207,8 +181,6 @@
                 "populationSize",
                 "initialInfected",
                 "transmissionRate",
-                "incubationPeriod",
-                "infectiousPeriod",
                 "recoveryRate",
                 "movementRange",
                 "simulationSpeed",
@@ -238,6 +210,9 @@
                     );
                     this.targetX = Math.random() * canvas.width;
                     this.targetY = Math.random() * canvas.height;
+
+                    this.incubationPeriod = Math.floor(Math.random() * 8) + 7;
+                    this.infectiousPeriod = Math.floor(Math.random() * 8) + 7;
                 }
 
                 move(range) {
@@ -258,6 +233,7 @@
                         this.y += (dy / distance) * step;
                     }
                 }
+
                 draw() {
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
@@ -288,12 +264,6 @@
                     parseFloat(
                         document.getElementById("transmissionRate").value,
                     ) / 100;
-                const incubationPeriod = parseInt(
-                    document.getElementById("incubationPeriod").value,
-                );
-                const infectiousPeriod = parseInt(
-                    document.getElementById("infectiousPeriod").value,
-                );
                 const recoveryRate =
                     parseFloat(document.getElementById("recoveryRate").value) /
                     100;
@@ -306,13 +276,13 @@
                     agent.daysInState++;
                     if (
                         agent.state === 1 &&
-                        agent.daysInState >= incubationPeriod
+                        agent.daysInState >= agent.incubationPeriod
                     ) {
                         agent.state = 2;
                         agent.daysInState = 0;
                     } else if (
                         agent.state === 2 &&
-                        agent.daysInState >= infectiousPeriod
+                        agent.daysInState >= agent.infectiousPeriod
                     ) {
                         const deathProbability =
                             (1 - recoveryRate) * agent.ageGroup.multiplier;
