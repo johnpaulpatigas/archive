@@ -19,15 +19,22 @@
                     height: auto !important;
                 }
             }
+            #tooltip {
+                pointer-events: none;
+                transition: all 0.1s;
+            }
+            .hidden {
+                display: none;
+            }
         </style>
     </head>
     <body class="font-sans">
         <div class="max-w-screen-lg mx-auto p-8">
-            <div class="mb-8">
+            <div class="mb-6">
                 <a class="font-bold text-2xl">SEIRD Simulation</a>
             </div>
 
-            <div class="flex flex-col sm:flex-row justify-center gap-8 mb-8">
+            <div class="flex flex-col sm:flex-row justify-center gap-8 mb-6">
                 <canvas
                     id="simulationCanvas"
                     class="border-2 border-gray-300 rounded-lg shadow-md"
@@ -41,7 +48,7 @@
                     height="475"
                 ></canvas>
             </div>
-            <div id="controls" class="flex justify-center gap-4 mb-8">
+            <div id="controls" class="flex justify-center gap-4 mb-6">
                 <button
                     id="startBtn"
                     class="btn btn-outline btn-neutral py-2 px-4 hover:scale-110 text-lg w-24"
@@ -61,8 +68,12 @@
                     Download CSV
                 </button>
             </div>
-            <div id="stats" class="text-lg font-bold text-center mb-8"></div>
-            <div id="parameters" class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div id="stats" class="text-lg font-bold text-center mb-6"></div>
+            <div
+                id="tooltip"
+                class="hidden absolute bg-white border border-gray-300 p-2 rounded shadow-md text-sm"
+            ></div>
+            <div id="parameters" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div class="flex flex-col">
                     <label class="font-medium text-base"
                         >Population Size:</label
@@ -157,6 +168,7 @@
         <script>
             const canvas = document.getElementById("simulationCanvas");
             const ctx = canvas.getContext("2d");
+            const tooltip = document.getElementById("tooltip");
             const chartCanvas = document.getElementById("chartCanvas");
             const chartCtx = chartCanvas.getContext("2d");
             const startBtn = document.getElementById("startBtn");
@@ -189,6 +201,44 @@
                 document
                     .getElementById(id)
                     .addEventListener("input", updateSimulationParameters);
+            });
+
+            let hoveredAgent = null;
+            canvas.addEventListener("mousemove", (event) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = event.clientX - rect.left;
+                const mouseY = event.clientY - rect.top;
+
+                hoveredAgent = null;
+                for (const agent of agents) {
+                    const dx = agent.x - mouseX;
+                    const dy = agent.y - mouseY;
+                    if (Math.sqrt(dx * dx + dy * dy) <= 4) {
+                        hoveredAgent = agent;
+                        break;
+                    }
+                }
+
+                if (hoveredAgent) {
+                    const stateLabels = [
+                        "Susceptible",
+                        "Exposed",
+                        "Infectious",
+                        "Recovered",
+                        "Deceased",
+                    ];
+                    tooltip.innerHTML = `
+                        <div class="font-bold">State: <span class="font-normal">${stateLabels[hoveredAgent.state]}</span></div>
+                        <div class="font-bold">Days in State: <span class="font-normal">${hoveredAgent.daysInState}</span></div>
+                        <div class="font-bold">Age: <span class="font-normal">${hoveredAgent.age}</span></div>
+                        <div class="font-bold">Age Group: <span class="font-normal">${hoveredAgent.ageGroup.label}</span></div>
+                    `;
+                    tooltip.style.left = `${event.pageX + 10}px`;
+                    tooltip.style.top = `${event.pageY + 10}px`;
+                    tooltip.classList.remove("hidden");
+                } else {
+                    tooltip.classList.add("hidden");
+                }
             });
 
             function updateSimulationParameters() {
@@ -236,9 +286,14 @@
                 draw() {
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-                    ctx.fillStyle = ["blue", "yellow", "red", "green", "black"][
-                        this.state
-                    ];
+
+                    ctx.fillStyle = [
+                        "#3b82f6", // blue
+                        "#eab308", // yellow
+                        "#ef4444", // red
+                        "#22c55e", // green
+                        "#000000", // black
+                    ][this.state];
                     ctx.fill();
                 }
             }
@@ -424,31 +479,31 @@
                                 {
                                     label: "Susceptible",
                                     data: [],
-                                    borderColor: "blue",
+                                    borderColor: "#3b82f6",
                                     fill: false,
                                 },
                                 {
                                     label: "Exposed",
                                     data: [],
-                                    borderColor: "yellow",
+                                    borderColor: "#eab308",
                                     fill: false,
                                 },
                                 {
                                     label: "Infectious",
                                     data: [],
-                                    borderColor: "red",
+                                    borderColor: "#ef4444",
                                     fill: false,
                                 },
                                 {
                                     label: "Recovered",
                                     data: [],
-                                    borderColor: "green",
+                                    borderColor: "#22c55e",
                                     fill: false,
                                 },
                                 {
                                     label: "Deaths",
                                     data: [],
-                                    borderColor: "black",
+                                    borderColor: "#000000",
                                     fill: false,
                                 },
                             ],
