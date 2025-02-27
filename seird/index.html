@@ -169,7 +169,6 @@
             let chart;
             let isRunning = false;
             let dayCounter = 0;
-            let deathCount = 0;
 
             const ageGroups = [
                 { min: 0, max: 17, multiplier: 0.2, label: "Young" },
@@ -287,9 +286,6 @@
                         const deathProbability =
                             (1 - recoveryRate) * agent.ageGroup.multiplier;
                         agent.state = Math.random() < deathProbability ? 4 : 3;
-                        if (agent.state === 4) {
-                            deathCount++;
-                        }
                         agent.daysInState = 0;
                     }
                 });
@@ -368,18 +364,54 @@
                 .addEventListener("click", downloadCSV);
 
             function updateStats() {
-                const counts = agents.reduce(
+                const detailedCounts = agents.reduce(
                     (acc, agent) => {
-                        acc[agent.state]++;
+                        const state = agent.state;
+                        const ageGroup = agent.ageGroup.label;
+                        acc[state][ageGroup]++;
                         return acc;
                     },
-                    [0, 0, 0, 0, 0],
+                    {
+                        0: { Young: 0, Adult: 0, Senior: 0 },
+                        1: { Young: 0, Adult: 0, Senior: 0 },
+                        2: { Young: 0, Adult: 0, Senior: 0 },
+                        3: { Young: 0, Adult: 0, Senior: 0 },
+                        4: { Young: 0, Adult: 0, Senior: 0 },
+                    },
                 );
 
-                statsDiv.innerHTML = `
-                Day: ${dayCounter}, Susceptible: ${counts[0]}, Exposed: ${counts[1]}, Infectious: ${counts[2]}, Recovered: ${counts[3]}, Deaths: ${deathCount}`;
-                updateChart(counts);
-                captureData(counts);
+                const totals = [0, 0, 0, 0, 0];
+                for (let i = 0; i < 5; i++) {
+                    totals[i] = Object.values(detailedCounts[i]).reduce(
+                        (a, b) => a + b,
+                        0,
+                    );
+                }
+
+                let statsHTML = `<div class="mb-2">Day: ${dayCounter}</div>`;
+                const stateLabels = [
+                    "Susceptible",
+                    "Exposed",
+                    "Infectious",
+                    "Recovered",
+                    "Deaths",
+                ];
+
+                statsHTML += `<div class="grid grid-cols-4 gap-2">`;
+                stateLabels.forEach((label, index) => {
+                    const counts = detailedCounts[index];
+                    statsHTML += `
+                        <div class="font-bold">${label}:</div>
+                        <div class="text-blue-500">Young (${counts.Young})</div>
+                        <div class="text-green-500">Adult (${counts.Adult})</div>
+                        <div class="text-red-500">Senior (${counts.Senior})</div>
+                    `;
+                });
+                statsHTML += `</div>`;
+
+                statsDiv.innerHTML = statsHTML;
+                updateChart(totals);
+                captureData(totals);
             }
 
             function updateChart(counts) {
@@ -466,7 +498,6 @@
                 isRunning = false;
                 startBtn.textContent = "Start";
                 dayCounter = 0;
-                deathCount = 0;
                 csvData = [
                     [
                         "day",
