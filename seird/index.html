@@ -398,23 +398,34 @@
             let csvData = [
                 [
                     "day",
-                    "susceptible",
-                    "exposed",
-                    "infectious",
-                    "recovered",
-                    "deaths",
+                    "susceptible_Young",
+                    "susceptible_Adult",
+                    "susceptible_Senior",
+                    "exposed_Young",
+                    "exposed_Adult",
+                    "exposed_Senior",
+                    "infectious_Young",
+                    "infectious_Adult",
+                    "infectious_Senior",
+                    "recovered_Young",
+                    "recovered_Adult",
+                    "recovered_Senior",
+                    "deaths_Young",
+                    "deaths_Adult",
+                    "deaths_Senior",
                 ],
             ];
 
-            function captureData(counts) {
-                csvData.push([
-                    dayCounter,
-                    counts[0],
-                    counts[1],
-                    counts[2],
-                    counts[3],
-                    counts[4],
-                ]);
+            function captureData(detailedCounts) {
+                const row = [dayCounter];
+                for (let state of [0, 1, 2, 3, 4]) {
+                    row.push(
+                        detailedCounts[state].Young,
+                        detailedCounts[state].Adult,
+                        detailedCounts[state].Senior,
+                    );
+                }
+                csvData.push(row);
             }
 
             function downloadCSV() {
@@ -484,7 +495,7 @@
 
                 statsDiv.innerHTML = statsHTML;
                 updateChart(totals);
-                captureData(totals);
+                captureData(detailedCounts);
             }
 
             function updateChart(counts) {
@@ -574,11 +585,21 @@
                 csvData = [
                     [
                         "day",
-                        "susceptible",
-                        "exposed",
-                        "infectious",
-                        "recovered",
-                        "deaths",
+                        "susceptible_Young",
+                        "susceptible_Adult",
+                        "susceptible_Senior",
+                        "exposed_Young",
+                        "exposed_Adult",
+                        "exposed_Senior",
+                        "infectious_Young",
+                        "infectious_Adult",
+                        "infectious_Senior",
+                        "recovered_Young",
+                        "recovered_Adult",
+                        "recovered_Senior",
+                        "deaths_Young",
+                        "deaths_Adult",
+                        "deaths_Senior",
                     ],
                 ];
 
