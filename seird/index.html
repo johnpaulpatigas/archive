@@ -12,33 +12,61 @@
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
-            @media (max-width: 720px) {
-                #simulationCanvas,
-                #chartCanvas {
-                    width: 100% !important;
-                    height: auto !important;
-                }
+            .canvas-container {
+                width: 100%;
+                max-width: 475px;
+                aspect-ratio: 1 / 1;
+                margin: auto;
             }
+            canvas {
+                display: block;
+                width: 100%;
+                height: 100%;
+                border: 2px solid #d1d5db;
+                border-radius: 0.5rem;
+                box-shadow:
+                    0 4px 6px -1px rgb(0 0 0 / 0.1),
+                    0 2px 4px -2px rgb(0 0 0 / 0.1);
+            }
+            [data-theme="dark"] canvas {
+                border-color: #4b5563;
+            }
+
             #tooltip {
                 pointer-events: none;
-                transition: all 0.1s;
+                transition:
+                    opacity 0.1s,
+                    transform 0.1s;
+                z-index: 10;
+                min-width: 150px;
             }
             .hidden {
-                display: none;
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            .visible {
+                opacity: 1;
+                transform: scale(1);
+            }
+            .input-error-state {
+                border-color: red !important;
+            }
+            label {
+                margin-bottom: 0.25rem;
+                display: inline-block;
             }
         </style>
     </head>
     <body class="font-sans">
-        <div class="max-w-screen-lg mx-auto p-8">
+        <div class="container max-w-screen-lg mx-auto p-4 md:p-8">
             <div class="mb-6 flex justify-between items-center">
-                <a class="font-bold text-2xl">SEIRD Simulation</a>
+                <h1 class="font-bold text-2xl">SEIRD Simulation</h1>
                 <label class="swap swap-rotate">
                     <input
                         type="checkbox"
                         class="theme-controller"
                         value="dark"
                     />
-
                     <svg
                         class="swap-off h-8 w-8 fill-current"
                         xmlns="http://www.w3.org/2000/svg"
@@ -61,48 +89,63 @@
                 </label>
             </div>
 
-            <div class="flex flex-col sm:flex-row justify-center gap-8 mb-6">
-                <canvas
-                    id="simulationCanvas"
-                    class="border-2 border-gray-300 rounded-lg shadow-md"
-                    width="470"
-                    height="470"
-                ></canvas>
-                <canvas
-                    id="chartCanvas"
-                    class="border-2 border-gray-300 rounded-lg shadow-md"
-                    width="475"
-                    height="475"
-                ></canvas>
+            <div
+                class="flex flex-col lg:flex-row justify-center gap-4 md:gap-8 mb-6"
+            >
+                <div class="canvas-container">
+                    <canvas id="simulationCanvas"></canvas>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="chartCanvas"></canvas>
+                </div>
             </div>
-            <div id="controls" class="flex justify-center gap-4 mb-6">
+
+            <div id="controls" class="flex flex-wrap justify-center gap-4 mb-6">
                 <button
                     id="startBtn"
-                    class="btn btn-outline btn-neutral py-2 px-4 hover:scale-110 text-lg w-24"
+                    class="btn btn-outline btn-neutral py-2 px-4 hover:scale-105 text-lg w-28"
                 >
                     Start
                 </button>
                 <button
                     id="resetBtn"
-                    class="btn btn-outline btn-neutral py-2 px-4 hover:scale-110 text-lg w-24"
+                    class="btn btn-outline btn-neutral py-2 px-4 hover:scale-105 text-lg w-28"
                 >
                     Reset
                 </button>
                 <button
                     id="downloadBtn"
-                    class="btn btn-outline btn-neutral py-2 px-4 hover:scale-110 text-lg w-48"
+                    class="btn btn-outline btn-neutral py-2 px-4 hover:scale-105 text-lg w-48"
                 >
                     Download CSV
                 </button>
             </div>
-            <div id="stats" class="text-lg font-bold text-center mb-6"></div>
+
+            <div
+                id="paramChangeNote"
+                class="text-center text-sm text-warning mb-4 hidden"
+            >
+                Parameter changed. Click 'Reset' to apply changes and restart
+                the simulation.
+            </div>
+
+            <div id="stats" class="text-center mb-6 border rounded p-4">
+                <!-- Stats will be populated here -->
+                <div class="text-lg font-bold">Day: 0</div>
+                <div>Loading...</div>
+            </div>
+
             <div
                 id="tooltip"
-                class="hidden absolute bg-white border border-gray-300 p-2 rounded shadow-md text-sm"
+                class="hidden absolute bg-base-100 border border-base-300 p-2 rounded shadow-md text-sm"
             ></div>
-            <div id="parameters" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div class="flex flex-col">
-                    <label class="font-medium text-base"
+
+            <div
+                id="parameters"
+                class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4"
+            >
+                <div>
+                    <label for="populationSize" class="font-medium text-base"
                         >Population Size:</label
                     >
                     <input
@@ -111,12 +154,16 @@
                         min="50"
                         max="1000"
                         step="10"
-                        class="input input-bordered"
+                        class="input input-bordered w-full"
                         value="200"
+                        data-param-name="Population Size"
                     />
+                    <div class="text-xs text-base-content/70 mt-1">
+                        Total number of agents (50-1000).
+                    </div>
                 </div>
-                <div class="flex flex-col">
-                    <label class="font-medium text-base"
+                <div>
+                    <label for="initialInfected" class="font-medium text-base"
                         >Initial Infected:</label
                     >
                     <input
@@ -124,516 +171,598 @@
                         id="initialInfected"
                         min="1"
                         max="100"
-                        class="input input-bordered"
-                        value="20"
+                        class="input input-bordered w-full"
+                        value="10"
+                        data-param-name="Initial Infected"
                     />
+                    <div class="text-xs text-base-content/70 mt-1">
+                        Number of agents starting in the 'Infectious' state
+                        (1-100).
+                    </div>
                 </div>
-                <div class="flex flex-col">
-                    <label class="font-medium text-base"
-                        >Transmission Rate (%):</label
+                <div>
+                    <label for="transmissionRate" class="font-medium text-base"
+                        >Transmission Probability (%):</label
                     >
                     <input
                         type="number"
                         id="transmissionRate"
                         min="0"
                         max="100"
-                        class="input input-bordered"
-                        value="40"
+                        step="1"
+                        class="input input-bordered w-full"
+                        value="50"
+                        data-param-name="Transmission Probability"
                     />
+                    <div class="text-xs text-base-content/70 mt-1">
+                        Base chance an infectious agent infects a nearby
+                        susceptible agent per day (0-100).
+                    </div>
                 </div>
-                <div class="flex flex-col">
-                    <label class="font-medium text-base"
-                        >Recovery Rate (%):</label
+                <div>
+                    <label for="survivalChance" class="font-medium text-base"
+                        >Survival Chance (%):</label
                     >
                     <input
                         type="number"
-                        id="recoveryRate"
+                        id="survivalChance"
                         min="0"
                         max="100"
-                        class="input input-bordered"
-                        value="100"
+                        step="1"
+                        class="input input-bordered w-full"
+                        value="98"
+                        data-param-name="Survival Chance"
                     />
+                    <div class="text-xs text-base-content/70 mt-1">
+                        Chance an agent recovers (vs. dies) after the infectious
+                        period (0-100). Adjusted by age.
+                    </div>
                 </div>
-                <div class="flex flex-col">
-                    <label class="font-medium text-base">Movement Range:</label>
+                <div>
+                    <label for="movementRange" class="font-medium text-base"
+                        >Movement Speed:</label
+                    >
                     <input
                         type="number"
                         id="movementRange"
-                        min="1"
+                        min="0"
                         max="10"
-                        class="input input-bordered"
-                        value="5"
+                        step="0.5"
+                        class="input input-bordered w-full"
+                        value="2"
+                        data-param-name="Movement Speed"
                     />
+                    <div class="text-xs text-base-content/70 mt-1">
+                        Maximum distance an agent moves per day (0-10).
+                    </div>
                 </div>
-                <div class="flex flex-col">
-                    <label class="font-medium text-base"
-                        >Simulation Speed (ms):</label
+                <div>
+                    <label for="simulationSpeed" class="font-medium text-base"
+                        >Simulation Speed (ms/day):</label
                     >
                     <input
                         type="number"
                         id="simulationSpeed"
-                        min="100"
-                        max="1000"
-                        step="100"
-                        class="input input-bordered"
-                        value="500"
+                        min="50"
+                        max="2000"
+                        step="50"
+                        class="input input-bordered w-full"
+                        value="200"
+                        data-param-name="Simulation Speed"
                     />
+                    <div class="text-xs text-base-content/70 mt-1">
+                        Milliseconds delay between each simulation day
+                        (50-2000). Lower is faster.
+                    </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <label class="font-medium"
+                <div class="sm:col-span-2 flex items-center gap-2 mt-2">
+                    <label for="restrictMovement" class="font-medium"
                         >Restrict Movement of Infectious:</label
                     >
                     <input
                         type="checkbox"
                         id="restrictMovement"
-                        class="toggle"
+                        class="toggle toggle-primary"
                     />
+                    <span class="text-xs text-base-content/70"
+                        >(Prevents infectious agents from moving)</span
+                    >
                 </div>
             </div>
         </div>
 
         <script>
-            const canvas = document.getElementById("simulationCanvas");
-            const ctx = canvas.getContext("2d");
-            const tooltip = document.getElementById("tooltip");
+            const States = Object.freeze({
+                SUSCEPTIBLE: 0,
+                EXPOSED: 1,
+                INFECTIOUS: 2,
+                RECOVERED: 3,
+                DECEASED: 4,
+            });
+            const StateLabels = [
+                "Susceptible",
+                "Exposed",
+                "Infectious",
+                "Recovered",
+                "Deceased",
+            ];
+            const StateColors = [
+                "#3b82f6",
+                "#eab308",
+                "#ef4444",
+                "#22c55e",
+                "#374151",
+            ];
+            const AGE_GROUPS = [
+                { min: 0, max: 17, multiplier: 0.2, label: "Young" },
+                { min: 18, max: 64, multiplier: 1.0, label: "Adult" },
+                { min: 65, max: 100, multiplier: 4.0, label: "Senior" },
+            ];
+            const AGENT_RADIUS = 2;
+            const INTERACTION_DISTANCE = AGENT_RADIUS * 2;
+            const INFECTION_PROBABILITY_DECAY = 5;
+
+            const simulationCanvas =
+                document.getElementById("simulationCanvas");
+            const simCtx = simulationCanvas.getContext("2d");
             const chartCanvas = document.getElementById("chartCanvas");
             const chartCtx = chartCanvas.getContext("2d");
+            const tooltip = document.getElementById("tooltip");
             const startBtn = document.getElementById("startBtn");
             const resetBtn = document.getElementById("resetBtn");
+            const downloadBtn = document.getElementById("downloadBtn");
             const statsDiv = document.getElementById("stats");
+            const paramChangeNote = document.getElementById("paramChangeNote");
             const restrictMovementToggle =
                 document.getElementById("restrictMovement");
+            const parameterInputs = document.querySelectorAll(
+                '#parameters input[type="number"], #parameters input[type="checkbox"]',
+            );
 
             let agents = [];
-            let chart;
+            let chart = null;
             let isRunning = false;
             let dayCounter = 0;
-
-            const ageGroups = [
-                { min: 0, max: 17, multiplier: 0.2, label: "Young" },
-                { min: 18, max: 64, multiplier: 1, label: "Adult" },
-                { min: 65, max: 100, multiplier: 4, label: "Senior" },
-            ];
-
-            const parameters = [
-                "populationSize",
-                "initialInfected",
-                "transmissionRate",
-                "recoveryRate",
-                "movementRange",
-                "simulationSpeed",
-            ];
-
-            parameters.forEach((id) => {
-                document
-                    .getElementById(id)
-                    .addEventListener("input", updateSimulationParameters);
-            });
-
-            let hoveredAgent = null;
-            canvas.addEventListener("mousemove", (event) => {
-                const rect = canvas.getBoundingClientRect();
-                const mouseX = event.clientX - rect.left;
-                const mouseY = event.clientY - rect.top;
-
-                hoveredAgent = null;
-                for (const agent of agents) {
-                    const dx = agent.x - mouseX;
-                    const dy = agent.y - mouseY;
-                    if (Math.sqrt(dx * dx + dy * dy) <= 4) {
-                        hoveredAgent = agent;
-                        break;
-                    }
-                }
-
-                if (hoveredAgent) {
-                    const stateLabels = [
-                        "Susceptible",
-                        "Exposed",
-                        "Infectious",
-                        "Recovered",
-                        "Deceased",
-                    ];
-                    tooltip.innerHTML = `
-                        <div class="font-bold">State: <span class="font-normal">${stateLabels[hoveredAgent.state]}</span></div>
-                        <div class="font-bold">Days in State: <span class="font-normal">${hoveredAgent.daysInState}</span></div>
-                        <div class="font-bold">Age: <span class="font-normal">${hoveredAgent.age}</span></div>
-                        <div class="font-bold">Age Group: <span class="font-normal">${hoveredAgent.ageGroup.label}</span></div>
-                        <div class="font-bold">Contacts: <span class="font-normal">${hoveredAgent.contacts}</span></div>
-                    `;
-                    tooltip.style.left = `${event.pageX + 10}px`;
-                    tooltip.style.top = `${event.pageY + 10}px`;
-                    tooltip.classList.remove("hidden");
-                } else {
-                    tooltip.classList.add("hidden");
-                }
-            });
-
-            function updateSimulationParameters() {
-                initializeAgents();
-                drawSimulation();
-                updateStats();
-            }
+            let simulationTimeout = null;
+            let csvData = [];
+            let currentParams = {};
 
             class Agent {
-                constructor(x, y, state) {
+                constructor(x, y, state, canvasWidth, canvasHeight) {
                     this.x = x;
                     this.y = y;
                     this.state = state;
                     this.daysInState = 0;
-                    this.contacts = 0;
-                    this.age = Math.floor(Math.random() * 100);
-                    this.ageGroup = ageGroups.find(
-                        (g) => this.age >= g.min && this.age <= g.max,
-                    );
-                    this.targetX = Math.random() * canvas.width;
-                    this.targetY = Math.random() * canvas.height;
+                    this.contactsToday = 0;
+                    this.totalContacts = 0;
+                    this.age = Math.floor(Math.random() * 101);
+                    this.ageGroup =
+                        AGE_GROUPS.find(
+                            (g) => this.age >= g.min && this.age <= g.max,
+                        ) || AGE_GROUPS[1];
+                    this.canvasWidth = canvasWidth;
+                    this.canvasHeight = canvasHeight;
 
-                    this.incubationPeriod = Math.floor(Math.random() * 8) + 7;
+                    this.targetX = Math.random() * this.canvasWidth;
+                    this.targetY = Math.random() * this.canvasHeight;
+
+                    this.incubationPeriod = Math.floor(Math.random() * 6) + 3;
                     this.infectiousPeriod = Math.floor(Math.random() * 8) + 7;
                 }
 
-                move(range) {
-                    if (this.state === 2 && restrictMovementToggle.checked)
+                move(movementSpeed) {
+                    if (
+                        this.state === States.DECEASED ||
+                        (this.state === States.INFECTIOUS &&
+                            restrictMovementToggle.checked)
+                    ) {
                         return;
-                    if (this.state === 4) return;
+                    }
+                    if (movementSpeed <= 0) return;
 
                     let dx = this.targetX - this.x;
                     let dy = this.targetY - this.y;
                     let distance = Math.sqrt(dx * dx + dy * dy);
 
-                    if (distance < 4) {
-                        this.targetX = Math.random() * canvas.width;
-                        this.targetY = Math.random() * canvas.height;
-                    } else {
-                        let step = range;
-                        this.x += (dx / distance) * step;
-                        this.y += (dy / distance) * step;
+                    if (distance < movementSpeed * 2 || distance <= 4) {
+                        this.targetX = Math.random() * this.canvasWidth;
+                        this.targetY = Math.random() * this.canvasHeight;
+
+                        dx = this.targetX - this.x;
+                        dy = this.targetY - this.y;
+                        distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < 1e-6) return;
                     }
+
+                    let step = Math.min(movementSpeed, distance);
+                    this.x += (dx / distance) * step;
+                    this.y += (dy / distance) * step;
+
+                    this.x = Math.max(
+                        AGENT_RADIUS,
+                        Math.min(this.canvasWidth - AGENT_RADIUS, this.x),
+                    );
+                    this.y = Math.max(
+                        AGENT_RADIUS,
+                        Math.min(this.canvasHeight - AGENT_RADIUS, this.y),
+                    );
                 }
 
                 draw() {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                    simCtx.beginPath();
+                    simCtx.arc(this.x, this.y, AGENT_RADIUS, 0, Math.PI * 2);
+                    simCtx.fillStyle = StateColors[this.state];
+                    simCtx.fill();
+                }
 
-                    ctx.fillStyle = [
-                        "#3b82f6", // blue
-                        "#eab308", // yellow
-                        "#ef4444", // red
-                        "#22c55e", // green
-                        "#000000", // black
-                    ][this.state];
-                    ctx.fill();
+                updateState(baseSurvivalChance) {
+                    this.daysInState++;
+
+                    if (
+                        this.state === States.EXPOSED &&
+                        this.daysInState >= this.incubationPeriod
+                    ) {
+                        this.state = States.INFECTIOUS;
+                        this.daysInState = 0;
+                    } else if (
+                        this.state === States.INFECTIOUS &&
+                        this.daysInState >= this.infectiousPeriod
+                    ) {
+                        const deathProbability =
+                            (1 - baseSurvivalChance) * this.ageGroup.multiplier;
+                        this.state =
+                            Math.random() < 1 - deathProbability
+                                ? States.RECOVERED
+                                : States.DECEASED;
+                        this.daysInState = 0;
+                    }
+                }
+
+                tryInfect(targetAgent, baseTransmissionRate) {
+                    if (
+                        this.state !== States.INFECTIOUS ||
+                        targetAgent.state !== States.SUSCEPTIBLE
+                    ) {
+                        return false;
+                    }
+
+                    const dx = this.x - targetAgent.x;
+                    const dy = this.y - targetAgent.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance <= INTERACTION_DISTANCE) {
+                        this.contactsToday++;
+                        targetAgent.contactsToday++;
+
+                        const infectionProbability =
+                            baseTransmissionRate *
+                            Math.exp(-distance / INFECTION_PROBABILITY_DECAY);
+
+                        if (Math.random() < infectionProbability) {
+                            return true;
+                        }
+                    }
+                    return false;
                 }
             }
 
-            function initializeAgents() {
-                const populationSize = parseInt(
-                    document.getElementById("populationSize").value,
+            function getParameters() {
+                const params = {
+                    populationSize: parseInt(
+                        document.getElementById("populationSize").value,
+                    ),
+                    initialInfected: parseInt(
+                        document.getElementById("initialInfected").value,
+                    ),
+                    transmissionRate:
+                        parseFloat(
+                            document.getElementById("transmissionRate").value,
+                        ) / 100,
+                    survivalChance:
+                        parseFloat(
+                            document.getElementById("survivalChance").value,
+                        ) / 100,
+                    movementRange: parseFloat(
+                        document.getElementById("movementRange").value,
+                    ),
+                    simulationSpeed: parseInt(
+                        document.getElementById("simulationSpeed").value,
+                    ),
+                    restrictMovement:
+                        document.getElementById("restrictMovement").checked,
+                };
+
+                const popInput = document.getElementById("populationSize");
+                const infInput = document.getElementById("initialInfected");
+
+                params.populationSize =
+                    Math.max(
+                        parseInt(popInput.min),
+                        Math.min(parseInt(popInput.max), params.populationSize),
+                    ) || 200;
+                params.initialInfected =
+                    Math.max(
+                        parseInt(infInput.min),
+                        Math.min(
+                            parseInt(infInput.max),
+                            params.initialInfected,
+                        ),
+                    ) || 1;
+
+                params.initialInfected = Math.min(
+                    params.populationSize,
+                    params.initialInfected,
                 );
-                const initialInfected = parseInt(
-                    document.getElementById("initialInfected").value,
+
+                popInput.value = params.populationSize;
+                infInput.value = params.initialInfected;
+                document.getElementById("transmissionRate").value = Math.max(
+                    0,
+                    Math.min(100, params.transmissionRate * 100),
                 );
-                agents = Array.from({ length: populationSize }, (_, i) => {
-                    const x = Math.random() * canvas.width;
-                    const y = Math.random() * canvas.height;
-                    const state = i < initialInfected ? 2 : 0;
-                    return new Agent(x, y, state);
-                });
+                document.getElementById("survivalChance").value = Math.max(
+                    0,
+                    Math.min(100, params.survivalChance * 100),
+                );
+                document.getElementById("movementRange").value = Math.max(
+                    0,
+                    Math.min(10, params.movementRange),
+                );
+                document.getElementById("simulationSpeed").value = Math.max(
+                    50,
+                    Math.min(2000, params.simulationSpeed),
+                );
+
+                return params;
+            }
+
+            function initializeAgents(params) {
+                agents = [];
+                const canvasWidth = simulationCanvas.width;
+                const canvasHeight = simulationCanvas.height;
+                for (let i = 0; i < params.populationSize; i++) {
+                    const x = Math.random() * canvasWidth;
+                    const y = Math.random() * canvasHeight;
+
+                    const state =
+                        i < params.initialInfected
+                            ? States.INFECTIOUS
+                            : States.SUSCEPTIBLE;
+                    agents.push(
+                        new Agent(x, y, state, canvasWidth, canvasHeight),
+                    );
+                }
             }
 
             function updateSimulation() {
-                const transmissionRate =
-                    parseFloat(
-                        document.getElementById("transmissionRate").value,
-                    ) / 100;
-                const recoveryRate =
-                    parseFloat(document.getElementById("recoveryRate").value) /
-                    100;
-                const movementRange = parseFloat(
-                    document.getElementById("movementRange").value,
-                );
+                agents.forEach((agent) => (agent.contactsToday = 0));
 
                 agents.forEach((agent) => {
-                    agent.move(movementRange);
-                    agent.daysInState++;
-                    if (
-                        agent.state === 1 &&
-                        agent.daysInState >= agent.incubationPeriod
-                    ) {
-                        agent.state = 2;
-                        agent.daysInState = 0;
-                    } else if (
-                        agent.state === 2 &&
-                        agent.daysInState >= agent.infectiousPeriod
-                    ) {
-                        const deathProbability =
-                            (1 - recoveryRate) * agent.ageGroup.multiplier;
-                        agent.state = Math.random() < deathProbability ? 4 : 3;
-                        agent.daysInState = 0;
-                    }
+                    agent.updateState(currentParams.survivalChance);
+                    agent.move(currentParams.movementRange);
                 });
 
-                const sources = agents.filter(
-                    (a) => a.state === 1 || a.state === 2,
+                const infectiousAgents = agents.filter(
+                    (a) => a.state === States.INFECTIOUS,
                 );
-                agents.forEach((agent) => {
-                    sources.forEach((source) => {
-                        if (agent === source) return;
-                        const dx = source.x - agent.x;
-                        const dy = source.y - agent.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
+                const susceptibleAgents = agents.filter(
+                    (a) => a.state === States.SUSCEPTIBLE,
+                );
+                let newlyExposed = [];
 
-                        if (distance <= 4) {
-                            agent.contacts++;
+                infectiousAgents.forEach((infectious) => {
+                    susceptibleAgents.forEach((susceptible) => {
+                        if (
+                            infectious === susceptible ||
+                            newlyExposed.includes(susceptible)
+                        )
+                            return;
+
+                        if (
+                            infectious.tryInfect(
+                                susceptible,
+                                currentParams.transmissionRate,
+                            )
+                        ) {
+                            newlyExposed.push(susceptible);
                         }
                     });
                 });
 
-                agents.forEach((susceptible) => {
-                    if (susceptible.state === 0) {
-                        let survivalProbability = 1;
-                        agents.forEach((infectious) => {
-                            if (infectious.state === 2) {
-                                const dx = infectious.x - susceptible.x;
-                                const dy = infectious.y - susceptible.y;
-                                const distance = Math.sqrt(dx * dx + dy * dy);
-                                const decayConstant = 4;
-                                const p_i =
-                                    transmissionRate *
-                                    Math.exp(-distance / decayConstant);
-
-                                survivalProbability *= 1 - p_i;
-                            }
-                        });
-                        const infectionProbability = 1 - survivalProbability;
-                        if (Math.random() < infectionProbability) {
-                            susceptible.state = 1;
-                            susceptible.daysInState = 0;
-                        }
-                    }
+                newlyExposed.forEach((agent) => {
+                    agent.state = States.EXPOSED;
+                    agent.daysInState = 0;
                 });
+
+                agents.forEach(
+                    (agent) => (agent.totalContacts += agent.contactsToday),
+                );
 
                 dayCounter++;
             }
 
             function drawSimulation() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const canvasWidth = simulationCanvas.width;
+                const canvasHeight = simulationCanvas.height;
+                simCtx.clearRect(0, 0, canvasWidth, canvasHeight);
                 agents.forEach((agent) => agent.draw());
             }
 
-            let csvData = [
-                [
-                    "day",
-                    "susceptible_Young",
-                    "susceptible_Adult",
-                    "susceptible_Senior",
-                    "exposed_Young",
-                    "exposed_Adult",
-                    "exposed_Senior",
-                    "infectious_Young",
-                    "infectious_Adult",
-                    "infectious_Senior",
-                    "recovered_Young",
-                    "recovered_Adult",
-                    "recovered_Senior",
-                    "deaths_Young",
-                    "deaths_Adult",
-                    "deaths_Senior",
-                ],
+            const CSV_HEADER = [
+                "Day",
+                "Susceptible_Total",
+                "Susceptible_Young",
+                "Susceptible_Adult",
+                "Susceptible_Senior",
+                "Exposed_Total",
+                "Exposed_Young",
+                "Exposed_Adult",
+                "Exposed_Senior",
+                "Infectious_Total",
+                "Infectious_Young",
+                "Infectious_Adult",
+                "Infectious_Senior",
+                "Recovered_Total",
+                "Recovered_Young",
+                "Recovered_Adult",
+                "Recovered_Senior",
+                "Deceased_Total",
+                "Deceased_Young",
+                "Deceased_Adult",
+                "Deceased_Senior",
             ];
 
-            function captureData(detailedCounts) {
+            function captureData(detailedCounts, totals) {
                 const row = [dayCounter];
-                for (let state of [0, 1, 2, 3, 4]) {
+                [
+                    States.SUSCEPTIBLE,
+                    States.EXPOSED,
+                    States.INFECTIOUS,
+                    States.RECOVERED,
+                    States.DECEASED,
+                ].forEach((state) => {
                     row.push(
+                        totals[state],
                         detailedCounts[state].Young,
                         detailedCounts[state].Adult,
                         detailedCounts[state].Senior,
                     );
-                }
+                });
                 csvData.push(row);
             }
 
             function downloadCSV() {
+                if (csvData.length === 0) {
+                    alert("No simulation data to download.");
+                    return;
+                }
                 let csvContent =
                     "data:text/csv;charset=utf-8," +
-                    csvData.map((e) => e.join(",")).join("\n");
+                    CSV_HEADER.join(",") +
+                    "\n";
+                csvContent += csvData.map((e) => e.join(",")).join("\n");
 
                 const encodedUri = encodeURI(csvContent);
                 const link = document.createElement("a");
                 link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "seir_simulation_data.csv");
+                const timestamp = new Date()
+                    .toISOString()
+                    .replace(/[:.]/g, "-");
+                link.setAttribute(
+                    "download",
+                    `seird_simulation_${timestamp}.csv`,
+                );
                 document.body.appendChild(link);
-
                 link.click();
                 document.body.removeChild(link);
             }
-
-            document
-                .getElementById("downloadBtn")
-                .addEventListener("click", downloadCSV);
 
             function updateStats() {
                 const detailedCounts = agents.reduce(
                     (acc, agent) => {
                         const state = agent.state;
-                        const ageGroup = agent.ageGroup.label;
-                        acc[state][ageGroup]++;
+                        const ageLabel = agent.ageGroup.label;
+                        if (!acc[state])
+                            acc[state] = { Young: 0, Adult: 0, Senior: 0 };
+                        acc[state][ageLabel]++;
                         return acc;
                     },
                     {
-                        0: { Young: 0, Adult: 0, Senior: 0 },
-                        1: { Young: 0, Adult: 0, Senior: 0 },
-                        2: { Young: 0, Adult: 0, Senior: 0 },
-                        3: { Young: 0, Adult: 0, Senior: 0 },
-                        4: { Young: 0, Adult: 0, Senior: 0 },
+                        [States.SUSCEPTIBLE]: { Young: 0, Adult: 0, Senior: 0 },
+                        [States.EXPOSED]: { Young: 0, Adult: 0, Senior: 0 },
+                        [States.INFECTIOUS]: { Young: 0, Adult: 0, Senior: 0 },
+                        [States.RECOVERED]: { Young: 0, Adult: 0, Senior: 0 },
+                        [States.DECEASED]: { Young: 0, Adult: 0, Senior: 0 },
                     },
                 );
 
-                const totals = [0, 0, 0, 0, 0];
-                for (let i = 0; i < 5; i++) {
-                    totals[i] = Object.values(detailedCounts[i]).reduce(
-                        (a, b) => a + b,
+                const totals = Object.values(States).map((state) =>
+                    Object.values(detailedCounts[state]).reduce(
+                        (sum, count) => sum + count,
                         0,
-                    );
-                }
+                    ),
+                );
 
-                let statsHTML = `<div class="mb-2">Day: ${dayCounter}</div>`;
-                const stateLabels = [
-                    "Susceptible",
-                    "Exposed",
-                    "Infectious",
-                    "Recovered",
-                    "Deaths",
-                ];
+                statsDiv.innerHTML = `
+                     <div class="text-lg font-bold mb-2">Day: ${dayCounter}</div>
+                     <div class="grid grid-cols-1 sm:grid-cols-5 gap-x-4 gap-y-2 text-sm">
+                         ${StateLabels.map(
+                             (label, index) => `
+                             <div class="p-1 rounded">
+                                 <div class="font-bold mb-1">${label}: ${totals[index]}</div>
+                                 <div class="ml-2">
+                                     <div><span class="text-blue-500">Y:</span> ${detailedCounts[index].Young}</div>
+                                     <div><span class="text-green-500">A:</span> ${detailedCounts[index].Adult}</div>
+                                     <div><span class="text-red-500">S:</span> ${detailedCounts[index].Senior}</div>
+                                 </div>
+                             </div>
+                         `,
+                         ).join("")}
+                     </div>`;
 
-                statsHTML += `<div class="grid grid-cols-4 gap-2">`;
-                stateLabels.forEach((label, index) => {
-                    const counts = detailedCounts[index];
-                    statsHTML += `
-                        <div class="font-bold">${label}:</div>
-                        <div class="text-blue-500">Young (${counts.Young})</div>
-                        <div class="text-green-500">Adult (${counts.Adult})</div>
-                        <div class="text-red-500">Senior (${counts.Senior})</div>
-                    `;
-                });
-                statsHTML += `</div>`;
-
-                statsDiv.innerHTML = statsHTML;
                 updateChart(totals);
-                captureData(detailedCounts);
+                captureData(detailedCounts, totals);
             }
 
-            function updateChart(counts) {
-                if (!chart) {
-                    chart = new Chart(chartCtx, {
-                        type: "line",
-                        data: {
-                            labels: [],
-                            datasets: [
-                                {
-                                    label: "Susceptible",
-                                    data: [],
-                                    borderColor: "#3b82f6",
-                                    fill: false,
+            function initializeChart() {
+                if (chart) {
+                    chart.destroy();
+                }
+                chart = new Chart(chartCtx, {
+                    type: "line",
+                    data: {
+                        labels: [],
+                        datasets: StateLabels.map((label, index) => ({
+                            label: label,
+                            data: [],
+                            borderColor: StateColors[index],
+                            backgroundColor: StateColors[index] + "80",
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 0,
+                            borderWidth: 2,
+                        })),
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: "linear",
+                                position: "bottom",
+                                title: { display: true, text: "Days" },
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: "Number of Agents",
                                 },
-                                {
-                                    label: "Exposed",
-                                    data: [],
-                                    borderColor: "#eab308",
-                                    fill: false,
-                                },
-                                {
-                                    label: "Infectious",
-                                    data: [],
-                                    borderColor: "#ef4444",
-                                    fill: false,
-                                },
-                                {
-                                    label: "Recovered",
-                                    data: [],
-                                    borderColor: "#22c55e",
-                                    fill: false,
-                                },
-                                {
-                                    label: "Deaths",
-                                    data: [],
-                                    borderColor: "#000000",
-                                    fill: false,
-                                },
-                            ],
-                        },
-                        options: {
-                            responsive: false,
-                            scales: {
-                                x: {
-                                    type: "linear",
-                                    position: "bottom",
-                                    title: { display: true, text: "Days" },
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    title: {
-                                        display: true,
-                                        text: "Population",
-                                    },
-                                },
+                                suggestedMax: currentParams.populationSize,
                             },
                         },
-                    });
-                }
+                        plugins: {
+                            legend: {
+                                position: "top",
+                            },
+                            title: {
+                                display: true,
+                                text: "Population Status Over Time",
+                            },
+                        },
+                    },
+                });
+            }
+
+            function updateChart(totals) {
+                if (!chart) return;
 
                 chart.data.labels.push(dayCounter);
                 chart.data.datasets.forEach((dataset, i) => {
-                    dataset.data.push(counts[i]);
+                    dataset.data.push(totals[i]);
                 });
+
                 chart.update();
-            }
-
-            function runSimulation() {
-                if (isRunning) {
-                    updateSimulation();
-                    drawSimulation();
-                    updateStats();
-                    setTimeout(
-                        runSimulation,
-                        parseInt(
-                            document.getElementById("simulationSpeed").value,
-                        ),
-                    );
-                }
-            }
-
-            function resetSimulation() {
-                isRunning = false;
-                startBtn.textContent = "Start";
-                dayCounter = 0;
-                csvData = [
-                    [
-                        "day",
-                        "susceptible_Young",
-                        "susceptible_Adult",
-                        "susceptible_Senior",
-                        "exposed_Young",
-                        "exposed_Adult",
-                        "exposed_Senior",
-                        "infectious_Young",
-                        "infectious_Adult",
-                        "infectious_Senior",
-                        "recovered_Young",
-                        "recovered_Adult",
-                        "recovered_Senior",
-                        "deaths_Young",
-                        "deaths_Adult",
-                        "deaths_Senior",
-                    ],
-                ];
-
-                initializeAgents();
-                drawSimulation();
-                updateStats();
-                resetChart();
             }
 
             function resetChart() {
@@ -642,18 +771,192 @@
                     chart.data.datasets.forEach(
                         (dataset) => (dataset.data = []),
                     );
+                    chart.options.scales.y.suggestedMax =
+                        currentParams.populationSize;
                     chart.update();
+                } else {
+                    initializeChart();
                 }
             }
 
-            startBtn.addEventListener("click", () => {
-                isRunning = !isRunning;
-                startBtn.textContent = isRunning ? "Pause" : "Resume";
-                if (isRunning) runSimulation();
+            function runSimulationStep() {
+                if (!isRunning) return;
+
+                updateSimulation();
+                drawSimulation();
+                updateStats();
+
+                simulationTimeout = setTimeout(
+                    runSimulationStep,
+                    currentParams.simulationSpeed,
+                );
+            }
+
+            function startSimulation() {
+                if (isRunning) return;
+                isRunning = true;
+                startBtn.textContent = "Pause";
+                startBtn.classList.remove("btn-success");
+                startBtn.classList.add("btn-warning");
+                runSimulationStep();
+            }
+
+            function pauseSimulation() {
+                if (!isRunning) return;
+                isRunning = false;
+                startBtn.textContent = "Resume";
+                startBtn.classList.remove("btn-warning");
+                startBtn.classList.add("btn-success");
+                clearTimeout(simulationTimeout);
+            }
+
+            function toggleSimulation() {
+                if (isRunning) {
+                    pauseSimulation();
+                } else {
+                    startSimulation();
+                }
+            }
+
+            function resetSimulation() {
+                pauseSimulation();
+                startBtn.textContent = "Start";
+                startBtn.classList.remove("btn-warning", "btn-success");
+
+                dayCounter = 0;
+                csvData = [];
+                currentParams = getParameters();
+
+                const simContainer = simulationCanvas.parentElement;
+                simulationCanvas.width = simContainer.clientWidth;
+                simulationCanvas.height = simContainer.clientHeight;
+                const chartContainer = chartCanvas.parentElement;
+
+                initializeAgents(currentParams);
+                initializeChart();
+                drawSimulation();
+                updateStats();
+
+                paramChangeNote.classList.add("hidden");
+                resetInputValidation();
+            }
+
+            startBtn.addEventListener("click", toggleSimulation);
+            resetBtn.addEventListener("click", resetSimulation);
+            downloadBtn.addEventListener("click", downloadCSV);
+
+            let hoveredAgent = null;
+            simulationCanvas.addEventListener("mousemove", (event) => {
+                const rect = simulationCanvas.getBoundingClientRect();
+
+                const scaleX = simulationCanvas.width / rect.width;
+                const scaleY = simulationCanvas.height / rect.height;
+                const mouseX = (event.clientX - rect.left) * scaleX;
+                const mouseY = (event.clientY - rect.top) * scaleY;
+
+                hoveredAgent = null;
+
+                for (let i = agents.length - 1; i >= 0; i--) {
+                    const agent = agents[i];
+
+                    const dx = agent.x - mouseX;
+                    const dy = agent.y - mouseY;
+                    if (dx * dx + dy * dy <= AGENT_RADIUS * AGENT_RADIUS * 4) {
+                        hoveredAgent = agent;
+                        break;
+                    }
+                }
+
+                if (hoveredAgent) {
+                    tooltip.innerHTML = `
+                         <div><strong>State:</strong> ${StateLabels[hoveredAgent.state]}</div>
+                         <div><strong>Days in State:</strong> ${hoveredAgent.daysInState}</div>
+                         <div><strong>Age:</strong> ${hoveredAgent.age} (${hoveredAgent.ageGroup.label})</div>
+                         <div><strong>Contacts (Total):</strong> ${hoveredAgent.totalContacts}</div>
+                     `;
+
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    const margin = 10;
+                    let left = event.pageX + margin;
+                    let top = event.pageY + margin;
+
+                    if (left + tooltipRect.width > window.innerWidth) {
+                        left = event.pageX - tooltipRect.width - margin;
+                    }
+
+                    if (top + tooltipRect.height > window.innerHeight) {
+                        top = event.pageY - tooltipRect.height - margin;
+                    }
+
+                    if (left < 0) {
+                        left = margin;
+                    }
+
+                    if (top < 0) {
+                        top = margin;
+                    }
+
+                    tooltip.style.left = `${left}px`;
+                    tooltip.style.top = `${top}px`;
+                    tooltip.classList.remove("hidden");
+                    tooltip.classList.add("visible");
+                } else {
+                    tooltip.classList.remove("visible");
+                    tooltip.classList.add("hidden");
+                }
+            });
+            simulationCanvas.addEventListener("mouseleave", () => {
+                tooltip.classList.remove("visible");
+                tooltip.classList.add("hidden");
             });
 
-            resetBtn.addEventListener("click", resetSimulation);
-            resetSimulation();
+            function handleParamChange(event) {
+                paramChangeNote.classList.remove("hidden");
+                validateInput(event.target);
+            }
+
+            function validateInput(inputElement) {
+                if (inputElement.type !== "number") return true;
+
+                const value = parseFloat(inputElement.value);
+                const min = parseFloat(inputElement.min);
+                const max = parseFloat(inputElement.max);
+                const name = inputElement.dataset.paramName || "Value";
+
+                let isValid = true;
+                if (isNaN(value)) {
+                    isValid = false;
+                } else if (value < min) {
+                    isValid = false;
+                } else if (value > max) {
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    inputElement.classList.add("input-error-state");
+                } else {
+                    inputElement.classList.remove("input-error-state");
+                }
+                return isValid;
+            }
+
+            function resetInputValidation() {
+                parameterInputs.forEach((input) => {
+                    input.classList.remove("input-error-state");
+                    validateInput(input);
+                });
+            }
+
+            parameterInputs.forEach((input) => {
+                input.addEventListener("input", handleParamChange);
+                validateInput(input);
+            });
+
+            function main() {
+                resetSimulation();
+            }
+
+            document.addEventListener("DOMContentLoaded", main);
         </script>
     </body>
 </html>
