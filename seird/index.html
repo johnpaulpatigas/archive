@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>SEIRD Simulation</title>
+        <title>SEIRDV Simulation</title>
         <link
             href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css"
             rel="stylesheet"
@@ -31,7 +31,6 @@
             [data-theme="dark"] canvas {
                 border-color: #4b5563;
             }
-
             #tooltip {
                 pointer-events: none;
                 transition:
@@ -55,12 +54,21 @@
                 margin-bottom: 0.25rem;
                 display: inline-block;
             }
+            .latex {
+                font-family: "Cambria Math", "Latin Modern Math", serif;
+                font-style: italic;
+            }
+            .param-desc {
+                @apply text-xs text-base-content/70 mt-1;
+            }
         </style>
     </head>
     <body class="font-sans">
-        <div class="container max-w-screen-lg mx-auto p-4 md:p-8">
+        <div class="container max-w-screen-xl mx-auto p-4 md:p-8">
             <div class="mb-6 flex justify-between items-center">
-                <h1 class="font-bold text-2xl">SEIRD Simulation</h1>
+                <h1 class="font-bold text-2xl md:text-3xl">
+                    SEIRDV Simulation
+                </h1>
                 <label class="swap swap-rotate">
                     <input
                         type="checkbox"
@@ -76,7 +84,6 @@
                             d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"
                         />
                     </svg>
-
                     <svg
                         class="swap-on h-8 w-8 fill-current"
                         xmlns="http://www.w3.org/2000/svg"
@@ -130,9 +137,14 @@
             </div>
 
             <div id="stats" class="text-center mb-6 border rounded p-4">
-                <!-- Stats will be populated here -->
-                <div class="text-lg font-bold">Day: 0</div>
-                <div>Loading...</div>
+                Loading...
+            </div>
+
+            <div
+                id="r0_display"
+                class="text-center mb-6 font-mono p-4 rounded-lg bg-base-200 text-lg"
+            >
+                Calculating R₀...
             </div>
 
             <div
@@ -140,13 +152,94 @@
                 class="hidden absolute bg-base-100 border border-base-300 p-2 rounded shadow-md text-sm"
             ></div>
 
+            <div class="collapse collapse-arrow bg-base-200 mb-6">
+                <input type="checkbox" />
+                <div class="collapse-title text-xl font-medium">
+                    Model Details & Equations
+                </div>
+                <div class="collapse-content">
+                    <p class="mb-4">
+                        This is an
+                        <a
+                            href="https://en.wikipedia.org/wiki/Agent-based_model"
+                            class="link"
+                            target="_blank"
+                            >Agent-Based Model (ABM)</a
+                        >
+                        that simulates a
+                        <a
+                            href="https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SEIR_model"
+                            class="link"
+                            target="_blank"
+                            >SEIR epidemic</a
+                        >. It visualizes individual agent interactions, which
+                        collectively approximate the dynamics described by the
+                        following system of Ordinary Differential Equations
+                        (ODEs):
+                    </p>
+                    <div
+                        class="font-mono bg-base-100 p-4 rounded-md text-sm md:text-base"
+                    >
+                        <div>
+                            <span class="latex">dS/dt = - (β * I * S) / N</span>
+                        </div>
+                        <div>
+                            <span class="latex"
+                                >dE/dt = (β * I * S) / N - σ * E</span
+                            >
+                        </div>
+                        <div>
+                            <span class="latex"
+                                >dI/dt = σ * E - (γ + μ) * I</span
+                            >
+                        </div>
+                        <div><span class="latex">dR/dt = γ * I</span></div>
+                        <div><span class="latex">dD/dt = μ * I</span></div>
+                    </div>
+                    <div
+                        class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm"
+                    >
+                        <div><strong class="latex">S</strong>: Susceptible</div>
+                        <div><strong class="latex">E</strong>: Exposed</div>
+                        <div><strong class="latex">I</strong>: Infectious</div>
+                        <div><strong class="latex">R</strong>: Recovered</div>
+                        <div><strong class="latex">D</strong>: Deceased</div>
+                        <div>
+                            <strong class="latex">N</strong>: Total Population
+                            (S+E+I+R)
+                        </div>
+                        <div>
+                            <strong class="latex">β (beta)</strong>: Effective
+                            contact rate
+                        </div>
+                        <div>
+                            <strong class="latex">σ (sigma)</strong>: Latent
+                            rate (1/incubation period)
+                        </div>
+                        <div>
+                            <strong class="latex">γ (gamma)</strong>: Recovery
+                            rate (1/infectious period)
+                        </div>
+                        <div>
+                            <strong class="latex">μ (mu)</strong>: Mortality
+                            rate
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div
                 id="parameters"
-                class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4"
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4"
             >
+                <div
+                    class="sm:col-span-2 lg:col-span-3 font-bold text-xl mb-2 border-b pb-2"
+                >
+                    Population & Disease Parameters
+                </div>
                 <div>
-                    <label for="populationSize" class="font-medium text-base"
-                        >Population Size:</label
+                    <label for="populationSize" class="font-medium"
+                        >Population Size (N):</label
                     >
                     <input
                         type="number"
@@ -156,15 +249,14 @@
                         step="10"
                         class="input input-bordered w-full"
                         value="200"
-                        data-param-name="Population Size"
                     />
-                    <div class="text-xs text-base-content/70 mt-1">
+                    <div class="param-desc">
                         Total number of agents (50-1000).
                     </div>
                 </div>
                 <div>
-                    <label for="initialInfected" class="font-medium text-base"
-                        >Initial Infected:</label
+                    <label for="initialInfected" class="font-medium"
+                        >Initial Infectious:</label
                     >
                     <input
                         type="number"
@@ -172,72 +264,119 @@
                         min="1"
                         max="100"
                         class="input input-bordered w-full"
+                        value="5"
+                    />
+                    <div class="param-desc">
+                        Number of agents starting in the 'Infectious' state.
+                    </div>
+                </div>
+                <div>
+                    <label for="contactsPerDay" class="font-medium"
+                        >Contacts per Day:</label
+                    >
+                    <input
+                        type="number"
+                        id="contactsPerDay"
+                        min="0"
+                        max="50"
+                        step="1"
+                        class="input input-bordered w-full"
                         value="10"
-                        data-param-name="Initial Infected"
                     />
-                    <div class="text-xs text-base-content/70 mt-1">
-                        Number of agents starting in the 'Infectious' state
-                        (1-100).
+                    <div class="param-desc">
+                        Average number of agents an infectious individual
+                        interacts with daily.
                     </div>
                 </div>
                 <div>
-                    <label for="transmissionRate" class="font-medium text-base"
-                        >Transmission Probability (%):</label
+                    <label for="transmissionProb" class="font-medium"
+                        >Transmission Prob. per Contact (%):</label
                     >
                     <input
                         type="number"
-                        id="transmissionRate"
+                        id="transmissionProb"
                         min="0"
                         max="100"
                         step="1"
                         class="input input-bordered w-full"
-                        value="50"
-                        data-param-name="Transmission Probability"
+                        value="5"
                     />
-                    <div class="text-xs text-base-content/70 mt-1">
-                        Base chance an infectious agent infects a nearby
-                        susceptible agent per day (0-100).
+                    <div class="param-desc">
+                        Chance of transmission during contact between infectious
+                        and susceptible agents.
                     </div>
                 </div>
                 <div>
-                    <label for="survivalChance" class="font-medium text-base"
-                        >Survival Chance (%):</label
+                    <label for="incubationPeriod" class="font-medium"
+                        >Avg. Incubation Period (days):</label
                     >
                     <input
                         type="number"
-                        id="survivalChance"
-                        min="0"
-                        max="100"
+                        id="incubationPeriod"
+                        min="1"
+                        max="30"
                         step="1"
                         class="input input-bordered w-full"
-                        value="98"
-                        data-param-name="Survival Chance"
+                        value="5"
                     />
-                    <div class="text-xs text-base-content/70 mt-1">
-                        Chance an agent recovers (vs. dies) after the infectious
-                        period (0-100). Adjusted by age.
+                    <div class="param-desc">
+                        Average time from exposure to becoming infectious (1/σ).
                     </div>
                 </div>
                 <div>
-                    <label for="movementRange" class="font-medium text-base"
+                    <label for="infectiousPeriod" class="font-medium"
+                        >Avg. Infectious Period (days):</label
+                    >
+                    <input
+                        type="number"
+                        id="infectiousPeriod"
+                        min="1"
+                        max="30"
+                        step="1"
+                        class="input input-bordered w-full"
+                        value="10"
+                    />
+                    <div class="param-desc">
+                        Average duration an agent is infectious (1/γ).
+                    </div>
+                </div>
+                <div>
+                    <label for="infectionFatalityRate" class="font-medium"
+                        >Infection Fatality Rate (%):</label
+                    >
+                    <input
+                        type="number"
+                        id="infectionFatalityRate"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        class="input input-bordered w-full"
+                        value="2"
+                    />
+                    <div class="param-desc">
+                        Base chance an infectious agent dies. Adjusted by age.
+                    </div>
+                </div>
+                <div>
+                    <label for="movementSpeed" class="font-medium"
                         >Movement Speed:</label
                     >
                     <input
                         type="number"
-                        id="movementRange"
+                        id="movementSpeed"
                         min="0"
                         max="10"
                         step="0.5"
                         class="input input-bordered w-full"
                         value="2"
-                        data-param-name="Movement Speed"
                     />
-                    <div class="text-xs text-base-content/70 mt-1">
-                        Maximum distance an agent moves per day (0-10).
+                    <div class="param-desc">
+                        Maximum distance an agent moves per day. Higher values
+                        increase population mixing.
                     </div>
                 </div>
                 <div>
-                    <label for="simulationSpeed" class="font-medium text-base"
+                    <label for="simulationSpeed" class="font-medium"
                         >Simulation Speed (ms/day):</label
                     >
                     <input
@@ -247,37 +386,100 @@
                         max="2000"
                         step="50"
                         class="input input-bordered w-full"
-                        value="200"
-                        data-param-name="Simulation Speed"
+                        value="500"
                     />
-                    <div class="text-xs text-base-content/70 mt-1">
-                        Milliseconds delay between each simulation day
-                        (50-2000). Lower is faster.
+                    <div class="param-desc">
+                        Milliseconds delay between each day. Lower is faster.
                     </div>
                 </div>
-                <div class="sm:col-span-2 flex items-center gap-2 mt-2">
-                    <label for="restrictMovement" class="font-medium"
-                        >Restrict Movement of Infectious:</label
+
+                <div
+                    class="sm:col-span-2 lg:col-span-3 font-bold text-xl mt-4 mb-2 border-b pb-2"
+                >
+                    Interventions
+                </div>
+                <div>
+                    <label for="vaccinationRate" class="font-medium"
+                        >Vaccination Rate (%):</label
+                    >
+                    <input
+                        type="number"
+                        id="vaccinationRate"
+                        min="0"
+                        max="100"
+                        step="1"
+                        class="input input-bordered w-full"
+                        value="0"
+                    />
+                    <div class="param-desc">
+                        Percentage of population vaccinated at Day 0.
+                    </div>
+                </div>
+                <div>
+                    <label for="vaccineEfficacy" class="font-medium"
+                        >Vaccine Efficacy (%):</label
+                    >
+                    <input
+                        type="number"
+                        id="vaccineEfficacy"
+                        min="0"
+                        max="100"
+                        step="1"
+                        class="input input-bordered w-full"
+                        value="95"
+                    />
+                    <div class="param-desc">
+                        Effectiveness of the vaccine at preventing infection.
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 mt-2">
+                    <label for="isolateInfectious" class="font-medium"
+                        >Isolate Infectious:</label
                     >
                     <input
                         type="checkbox"
-                        id="restrictMovement"
+                        id="isolateInfectious"
                         class="toggle toggle-primary"
                     />
-                    <span class="text-xs text-base-content/70"
-                        >(Prevents infectious agents from moving)</span
+                    <span class="param-desc"
+                        >(Prevents infectious agents from moving and making
+                        contact)</span
                     >
+                </div>
+                <div class="sm:col-span-2 lg:col-span-3 mt-2">
+                    <label for="socialDistancing" class="font-medium"
+                        >Social Distancing Level (% reduction in
+                        contacts):</label
+                    >
+                    <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value="0"
+                        class="range range-primary"
+                        id="socialDistancing"
+                    />
+                    <div class="w-full flex justify-between text-xs px-2">
+                        <span>0%</span>
+                        <span>50%</span>
+                        <span>100%</span>
+                    </div>
+                    <div class="param-desc">
+                        Reduces the 'Contacts per Day' for all agents.
+                    </div>
                 </div>
             </div>
         </div>
 
         <script>
+            // --- ENUMS AND CONSTANTS ---
             const States = Object.freeze({
                 SUSCEPTIBLE: 0,
                 EXPOSED: 1,
                 INFECTIOUS: 2,
                 RECOVERED: 3,
                 DECEASED: 4,
+                VACCINATED: 5,
             });
             const StateLabels = [
                 "Susceptible",
@@ -285,6 +487,7 @@
                 "Infectious",
                 "Recovered",
                 "Deceased",
+                "Vaccinated",
             ];
             const StateColors = [
                 "#3b82f6",
@@ -292,16 +495,23 @@
                 "#ef4444",
                 "#22c55e",
                 "#374151",
+                "#8b5cf6",
             ];
-            const AGE_GROUPS = [
-                { min: 0, max: 17, multiplier: 0.2, label: "Young" },
-                { min: 18, max: 64, multiplier: 1.0, label: "Adult" },
-                { min: 65, max: 100, multiplier: 4.0, label: "Senior" },
-            ];
-            const AGENT_RADIUS = 2;
-            const INTERACTION_DISTANCE = AGENT_RADIUS * 2;
-            const INFECTION_PROBABILITY_DECAY = 5;
 
+            const AGE_GROUPS = [
+                { min: 0, max: 17, fatality_multiplier: 0.1, label: "Young" },
+                { min: 18, max: 64, fatality_multiplier: 1.0, label: "Adult" },
+                {
+                    min: 65,
+                    max: 100,
+                    fatality_multiplier: 5.0,
+                    label: "Senior",
+                },
+            ];
+            const AGENT_RADIUS = 2.5;
+            const INTERACTION_RADIUS = AGENT_RADIUS * 5;
+
+            // --- DOM ELEMENTS ---
             const simulationCanvas =
                 document.getElementById("simulationCanvas");
             const simCtx = simulationCanvas.getContext("2d");
@@ -312,13 +522,12 @@
             const resetBtn = document.getElementById("resetBtn");
             const downloadBtn = document.getElementById("downloadBtn");
             const statsDiv = document.getElementById("stats");
+            const r0Div = document.getElementById("r0_display");
             const paramChangeNote = document.getElementById("paramChangeNote");
-            const restrictMovementToggle =
-                document.getElementById("restrictMovement");
-            const parameterInputs = document.querySelectorAll(
-                '#parameters input[type="number"], #parameters input[type="checkbox"]',
-            );
+            const parameterInputs =
+                document.querySelectorAll("#parameters input");
 
+            // --- SIMULATION STATE ---
             let agents = [];
             let chart = null;
             let isRunning = false;
@@ -327,14 +536,13 @@
             let csvData = [];
             let currentParams = {};
 
+            // --- AGENT CLASS ---
             class Agent {
                 constructor(x, y, state, canvasWidth, canvasHeight) {
                     this.x = x;
                     this.y = y;
                     this.state = state;
                     this.daysInState = 0;
-                    this.contactsToday = 0;
-                    this.totalContacts = 0;
                     this.age = Math.floor(Math.random() * 101);
                     this.ageGroup =
                         AGE_GROUPS.find(
@@ -342,42 +550,35 @@
                         ) || AGE_GROUPS[1];
                     this.canvasWidth = canvasWidth;
                     this.canvasHeight = canvasHeight;
-
                     this.targetX = Math.random() * this.canvasWidth;
                     this.targetY = Math.random() * this.canvasHeight;
-
-                    this.incubationPeriod = Math.floor(Math.random() * 6) + 3;
-                    this.infectiousPeriod = Math.floor(Math.random() * 8) + 7;
                 }
 
                 move(movementSpeed) {
+                    const isIsolated =
+                        this.state === States.INFECTIOUS &&
+                        currentParams.isolateInfectious;
                     if (
                         this.state === States.DECEASED ||
-                        (this.state === States.INFECTIOUS &&
-                            restrictMovementToggle.checked)
-                    ) {
+                        isIsolated ||
+                        movementSpeed <= 0
+                    )
                         return;
-                    }
-                    if (movementSpeed <= 0) return;
 
                     let dx = this.targetX - this.x;
                     let dy = this.targetY - this.y;
                     let distance = Math.sqrt(dx * dx + dy * dy);
 
-                    if (distance < movementSpeed * 2 || distance <= 4) {
+                    if (distance < movementSpeed * 2) {
                         this.targetX = Math.random() * this.canvasWidth;
                         this.targetY = Math.random() * this.canvasHeight;
-
-                        dx = this.targetX - this.x;
-                        dy = this.targetY - this.y;
-                        distance = Math.sqrt(dx * dx + dy * dy);
-                        if (distance < 1e-6) return;
                     }
 
                     let step = Math.min(movementSpeed, distance);
-                    this.x += (dx / distance) * step;
-                    this.y += (dy / distance) * step;
-
+                    if (distance > 1e-6) {
+                        this.x += (dx / distance) * step;
+                        this.y += (dy / distance) * step;
+                    }
                     this.x = Math.max(
                         AGENT_RADIUS,
                         Math.min(this.canvasWidth - AGENT_RADIUS, this.x),
@@ -395,123 +596,124 @@
                     simCtx.fill();
                 }
 
-                updateState(baseSurvivalChance) {
+                updateState() {
                     this.daysInState++;
-
+                    // Note: In a discrete time-step model, the probability of an event happening on any given day is 1 - exp(-rate).
                     if (
                         this.state === States.EXPOSED &&
-                        this.daysInState >= this.incubationPeriod
+                        Math.random() < 1 - Math.exp(-currentParams.sigma)
                     ) {
                         this.state = States.INFECTIOUS;
                         this.daysInState = 0;
-                    } else if (
-                        this.state === States.INFECTIOUS &&
-                        this.daysInState >= this.infectiousPeriod
-                    ) {
-                        const deathProbability =
-                            (1 - baseSurvivalChance) * this.ageGroup.multiplier;
-                        this.state =
-                            Math.random() < 1 - deathProbability
-                                ? States.RECOVERED
-                                : States.DECEASED;
-                        this.daysInState = 0;
-                    }
-                }
+                    } else if (this.state === States.INFECTIOUS) {
+                        const ageAdjustedMortalityRate =
+                            currentParams.mu *
+                            this.ageGroup.fatality_multiplier;
+                        const willDie =
+                            Math.random() <
+                            1 - Math.exp(-ageAdjustedMortalityRate);
+                        const willRecover =
+                            Math.random() < 1 - Math.exp(-currentParams.gamma);
 
-                tryInfect(targetAgent, baseTransmissionRate) {
-                    if (
-                        this.state !== States.INFECTIOUS ||
-                        targetAgent.state !== States.SUSCEPTIBLE
-                    ) {
-                        return false;
-                    }
-
-                    const dx = this.x - targetAgent.x;
-                    const dy = this.y - targetAgent.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance <= INTERACTION_DISTANCE) {
-                        this.contactsToday++;
-                        targetAgent.contactsToday++;
-
-                        const infectionProbability =
-                            baseTransmissionRate *
-                            Math.exp(-distance / INFECTION_PROBABILITY_DECAY);
-
-                        if (Math.random() < infectionProbability) {
-                            return true;
+                        if (willDie) {
+                            this.state = States.DECEASED;
+                        } else if (willRecover) {
+                            this.state = States.RECOVERED;
                         }
+                        if (willDie || willRecover) this.daysInState = 0;
                     }
-                    return false;
                 }
             }
 
+            // --- CORE SIMULATION LOGIC ---
+
             function getParameters() {
-                const params = {
-                    populationSize: parseInt(
-                        document.getElementById("populationSize").value,
-                    ),
-                    initialInfected: parseInt(
-                        document.getElementById("initialInfected").value,
-                    ),
-                    transmissionRate:
-                        parseFloat(
-                            document.getElementById("transmissionRate").value,
-                        ) / 100,
-                    survivalChance:
-                        parseFloat(
-                            document.getElementById("survivalChance").value,
-                        ) / 100,
-                    movementRange: parseFloat(
-                        document.getElementById("movementRange").value,
-                    ),
-                    simulationSpeed: parseInt(
-                        document.getElementById("simulationSpeed").value,
-                    ),
-                    restrictMovement:
-                        document.getElementById("restrictMovement").checked,
+                const params = {};
+                // Helper to parse inputs with validation
+                const parse = (
+                    id,
+                    isFloat = false,
+                    min = 0,
+                    max = Infinity,
+                ) => {
+                    const input = document.getElementById(id);
+                    const val = isFloat
+                        ? parseFloat(input.value)
+                        : parseInt(input.value);
+                    const saneVal = Math.max(min, Math.min(max, val));
+                    if (isNaN(saneVal)) {
+                        input.value = input.defaultValue;
+                        return isFloat
+                            ? parseFloat(input.defaultValue)
+                            : parseInt(input.defaultValue);
+                    }
+                    if (val !== saneVal) input.value = saneVal;
+                    return saneVal;
                 };
 
-                const popInput = document.getElementById("populationSize");
-                const infInput = document.getElementById("initialInfected");
-
-                params.populationSize =
-                    Math.max(
-                        parseInt(popInput.min),
-                        Math.min(parseInt(popInput.max), params.populationSize),
-                    ) || 200;
-                params.initialInfected =
-                    Math.max(
-                        parseInt(infInput.min),
-                        Math.min(
-                            parseInt(infInput.max),
-                            params.initialInfected,
-                        ),
-                    ) || 1;
-
-                params.initialInfected = Math.min(
-                    params.populationSize,
-                    params.initialInfected,
-                );
-
-                popInput.value = params.populationSize;
-                infInput.value = params.initialInfected;
-                document.getElementById("transmissionRate").value = Math.max(
-                    0,
-                    Math.min(100, params.transmissionRate * 100),
-                );
-                document.getElementById("survivalChance").value = Math.max(
-                    0,
-                    Math.min(100, params.survivalChance * 100),
-                );
-                document.getElementById("movementRange").value = Math.max(
-                    0,
-                    Math.min(10, params.movementRange),
-                );
-                document.getElementById("simulationSpeed").value = Math.max(
+                params.populationSize = parse(
+                    "populationSize",
+                    false,
                     50,
-                    Math.min(2000, params.simulationSpeed),
+                    1000,
                 );
+                params.initialInfected = parse(
+                    "initialInfected",
+                    false,
+                    1,
+                    params.populationSize,
+                );
+                params.contactsPerDay = parse("contactsPerDay", false, 0, 50);
+                params.transmissionProb =
+                    parse("transmissionProb", true, 0, 100) / 100;
+                params.incubationPeriod = parse(
+                    "incubationPeriod",
+                    true,
+                    1,
+                    30,
+                );
+                params.infectiousPeriod = parse(
+                    "infectiousPeriod",
+                    true,
+                    1,
+                    30,
+                );
+                params.infectionFatalityRate =
+                    parse("infectionFatalityRate", true, 0, 100) / 100;
+                params.movementSpeed = parse("movementSpeed", true, 0, 10);
+                params.simulationSpeed = parse(
+                    "simulationSpeed",
+                    false,
+                    50,
+                    2000,
+                );
+                params.vaccinationRate =
+                    parse("vaccinationRate", true, 0, 100) / 100;
+                params.vaccineEfficacy =
+                    parse("vaccineEfficacy", true, 0, 100) / 100;
+                params.isolateInfectious =
+                    document.getElementById("isolateInfectious").checked;
+                params.socialDistancing =
+                    parse("socialDistancing", true, 0, 100) / 100;
+
+                // Derived Epidemiological Parameters
+                const effectiveContacts =
+                    params.contactsPerDay * (1 - params.socialDistancing);
+                params.beta = effectiveContacts * params.transmissionProb;
+                params.sigma = 1 / params.incubationPeriod; // Rate from E to I
+                params.gamma = 1 / params.infectiousPeriod; // Rate from I to R
+                // Partition gamma into recovery and death. Let gamma_total = gamma + mu
+                // We define infectiousPeriod as time to *either* recovery or death.
+                // So, gamma_total = 1/infectiousPeriod
+                const gamma_total = 1 / params.infectiousPeriod;
+                params.mu = gamma_total * params.infectionFatalityRate; // Death rate
+                params.gamma = gamma_total * (1 - params.infectionFatalityRate); // Recovery rate
+
+                // Calculate R0
+                params.R0 =
+                    params.gamma + params.mu > 0
+                        ? params.beta / (params.gamma + params.mu)
+                        : 0;
 
                 return params;
             }
@@ -520,53 +722,84 @@
                 agents = [];
                 const canvasWidth = simulationCanvas.width;
                 const canvasHeight = simulationCanvas.height;
-                for (let i = 0; i < params.populationSize; i++) {
-                    const x = Math.random() * canvasWidth;
-                    const y = Math.random() * canvasHeight;
 
-                    const state =
-                        i < params.initialInfected
-                            ? States.INFECTIOUS
-                            : States.SUSCEPTIBLE;
+                for (let i = 0; i < params.populationSize; i++) {
                     agents.push(
-                        new Agent(x, y, state, canvasWidth, canvasHeight),
+                        new Agent(
+                            Math.random() * canvasWidth,
+                            Math.random() * canvasHeight,
+                            States.SUSCEPTIBLE,
+                            canvasWidth,
+                            canvasHeight,
+                        ),
                     );
+                }
+
+                // Apply vaccination
+                const vaccinatedCount = Math.floor(
+                    params.populationSize * params.vaccinationRate,
+                );
+                for (let i = 0; i < vaccinatedCount; i++) {
+                    if (Math.random() < params.vaccineEfficacy) {
+                        agents[i].state = States.VACCINATED;
+                    }
+                }
+
+                // Set initial infected from remaining susceptibles
+                const nonVaccinated = agents.filter(
+                    (a) => a.state === States.SUSCEPTIBLE,
+                );
+                for (
+                    let i = 0;
+                    i < params.initialInfected && i < nonVaccinated.length;
+                    i++
+                ) {
+                    nonVaccinated[i].state = States.INFECTIOUS;
                 }
             }
 
             function updateSimulation() {
-                agents.forEach((agent) => (agent.contactsToday = 0));
-
                 agents.forEach((agent) => {
-                    agent.updateState(currentParams.survivalChance);
-                    agent.move(currentParams.movementRange);
+                    agent.updateState();
+                    agent.move(currentParams.movementSpeed);
                 });
 
+                let newlyExposed = new Set();
                 const infectiousAgents = agents.filter(
-                    (a) => a.state === States.INFECTIOUS,
+                    (a) =>
+                        a.state === States.INFECTIOUS &&
+                        !currentParams.isolateInfectious,
                 );
-                const susceptibleAgents = agents.filter(
-                    (a) => a.state === States.SUSCEPTIBLE,
-                );
-                let newlyExposed = [];
+
+                if (infectiousAgents.length === 0) return;
+
+                const effectiveContacts =
+                    currentParams.contactsPerDay *
+                    (1 - currentParams.socialDistancing);
 
                 infectiousAgents.forEach((infectious) => {
-                    susceptibleAgents.forEach((susceptible) => {
-                        if (
-                            infectious === susceptible ||
-                            newlyExposed.includes(susceptible)
-                        )
-                            return;
+                    const potentialContacts = agents.filter(
+                        (a) =>
+                            a !== infectious && a.state === States.SUSCEPTIBLE,
+                    );
+                    if (potentialContacts.length === 0) return;
+
+                    for (let i = 0; i < effectiveContacts; i++) {
+                        // For simplicity in this ABM, we pick a random agent from the population as a "contact"
+                        const target =
+                            potentialContacts[
+                                Math.floor(
+                                    Math.random() * potentialContacts.length,
+                                )
+                            ];
 
                         if (
-                            infectious.tryInfect(
-                                susceptible,
-                                currentParams.transmissionRate,
-                            )
+                            target.state === States.SUSCEPTIBLE &&
+                            Math.random() < currentParams.transmissionProb
                         ) {
-                            newlyExposed.push(susceptible);
+                            newlyExposed.add(target);
                         }
-                    });
+                    }
                 });
 
                 newlyExposed.forEach((agent) => {
@@ -574,140 +807,34 @@
                     agent.daysInState = 0;
                 });
 
-                agents.forEach(
-                    (agent) => (agent.totalContacts += agent.contactsToday),
-                );
-
                 dayCounter++;
             }
 
             function drawSimulation() {
-                const canvasWidth = simulationCanvas.width;
-                const canvasHeight = simulationCanvas.height;
-                simCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+                simCtx.clearRect(
+                    0,
+                    0,
+                    simulationCanvas.width,
+                    simulationCanvas.height,
+                );
                 agents.forEach((agent) => agent.draw());
             }
 
-            const CSV_HEADER = [
-                "Day",
-                "Susceptible_Total",
-                "Susceptible_Young",
-                "Susceptible_Adult",
-                "Susceptible_Senior",
-                "Exposed_Total",
-                "Exposed_Young",
-                "Exposed_Adult",
-                "Exposed_Senior",
-                "Infectious_Total",
-                "Infectious_Young",
-                "Infectious_Adult",
-                "Infectious_Senior",
-                "Recovered_Total",
-                "Recovered_Young",
-                "Recovered_Adult",
-                "Recovered_Senior",
-                "Deceased_Total",
-                "Deceased_Young",
-                "Deceased_Adult",
-                "Deceased_Senior",
-            ];
-
-            function captureData(detailedCounts, totals) {
-                const row = [dayCounter];
-                [
-                    States.SUSCEPTIBLE,
-                    States.EXPOSED,
-                    States.INFECTIOUS,
-                    States.RECOVERED,
-                    States.DECEASED,
-                ].forEach((state) => {
-                    row.push(
-                        totals[state],
-                        detailedCounts[state].Young,
-                        detailedCounts[state].Adult,
-                        detailedCounts[state].Senior,
-                    );
-                });
-                csvData.push(row);
+            function runSimulationStep() {
+                if (!isRunning) return;
+                updateSimulation();
+                drawSimulation();
+                updateStats();
+                simulationTimeout = setTimeout(
+                    runSimulationStep,
+                    currentParams.simulationSpeed,
+                );
             }
 
-            function downloadCSV() {
-                if (csvData.length === 0) {
-                    alert("No simulation data to download.");
-                    return;
-                }
-                let csvContent =
-                    "data:text/csv;charset=utf-8," +
-                    CSV_HEADER.join(",") +
-                    "\n";
-                csvContent += csvData.map((e) => e.join(",")).join("\n");
-
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                const timestamp = new Date()
-                    .toISOString()
-                    .replace(/[:.]/g, "-");
-                link.setAttribute(
-                    "download",
-                    `seird_simulation_${timestamp}.csv`,
-                );
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-
-            function updateStats() {
-                const detailedCounts = agents.reduce(
-                    (acc, agent) => {
-                        const state = agent.state;
-                        const ageLabel = agent.ageGroup.label;
-                        if (!acc[state])
-                            acc[state] = { Young: 0, Adult: 0, Senior: 0 };
-                        acc[state][ageLabel]++;
-                        return acc;
-                    },
-                    {
-                        [States.SUSCEPTIBLE]: { Young: 0, Adult: 0, Senior: 0 },
-                        [States.EXPOSED]: { Young: 0, Adult: 0, Senior: 0 },
-                        [States.INFECTIOUS]: { Young: 0, Adult: 0, Senior: 0 },
-                        [States.RECOVERED]: { Young: 0, Adult: 0, Senior: 0 },
-                        [States.DECEASED]: { Young: 0, Adult: 0, Senior: 0 },
-                    },
-                );
-
-                const totals = Object.values(States).map((state) =>
-                    Object.values(detailedCounts[state]).reduce(
-                        (sum, count) => sum + count,
-                        0,
-                    ),
-                );
-
-                statsDiv.innerHTML = `
-                     <div class="text-lg font-bold mb-2">Day: ${dayCounter}</div>
-                     <div class="grid grid-cols-1 sm:grid-cols-5 gap-x-4 gap-y-2 text-sm">
-                         ${StateLabels.map(
-                             (label, index) => `
-                             <div class="p-1 rounded">
-                                 <div class="font-bold mb-1">${label}: ${totals[index]}</div>
-                                 <div class="ml-2">
-                                     <div><span class="text-blue-500">Y:</span> ${detailedCounts[index].Young}</div>
-                                     <div><span class="text-green-500">A:</span> ${detailedCounts[index].Adult}</div>
-                                     <div><span class="text-red-500">S:</span> ${detailedCounts[index].Senior}</div>
-                                 </div>
-                             </div>
-                         `,
-                         ).join("")}
-                     </div>`;
-
-                updateChart(totals);
-                captureData(detailedCounts, totals);
-            }
+            // --- UI AND VISUALIZATION ---
 
             function initializeChart() {
-                if (chart) {
-                    chart.destroy();
-                }
+                if (chart) chart.destroy();
                 chart = new Chart(chartCtx, {
                     type: "line",
                     data: {
@@ -716,7 +843,6 @@
                             label: label,
                             data: [],
                             borderColor: StateColors[index],
-                            backgroundColor: StateColors[index] + "80",
                             fill: false,
                             tension: 0.1,
                             pointRadius: 0,
@@ -729,7 +855,6 @@
                         scales: {
                             x: {
                                 type: "linear",
-                                position: "bottom",
                                 title: { display: true, text: "Days" },
                             },
                             y: {
@@ -738,13 +863,10 @@
                                     display: true,
                                     text: "Number of Agents",
                                 },
-                                suggestedMax: currentParams.populationSize,
                             },
                         },
                         plugins: {
-                            legend: {
-                                position: "top",
-                            },
+                            legend: { position: "top" },
                             title: {
                                 display: true,
                                 text: "Population Status Over Time",
@@ -756,12 +878,10 @@
 
             function updateChart(totals) {
                 if (!chart) return;
-
                 chart.data.labels.push(dayCounter);
-                chart.data.datasets.forEach((dataset, i) => {
-                    dataset.data.push(totals[i]);
-                });
-
+                chart.data.datasets.forEach((dataset, i) =>
+                    dataset.data.push(totals[i]),
+                );
                 chart.update();
             }
 
@@ -779,47 +899,48 @@
                 }
             }
 
-            function runSimulationStep() {
-                if (!isRunning) return;
+            function updateStats() {
+                const counts = Array(StateLabels.length).fill(0);
+                agents.forEach((agent) => counts[agent.state]++);
 
-                updateSimulation();
-                drawSimulation();
-                updateStats();
-
-                simulationTimeout = setTimeout(
-                    runSimulationStep,
-                    currentParams.simulationSpeed,
-                );
+                statsDiv.innerHTML = `
+                 <div class="text-lg font-bold mb-2">Day: ${dayCounter}</div>
+                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-sm">
+                     ${StateLabels.map(
+                         (label, index) => `
+                         <div class="p-1 rounded" style="color: ${StateColors[index]};">
+                             <div class="font-bold">${label}: ${counts[index]}</div>
+                         </div>
+                     `,
+                     ).join("")}
+                 </div>`;
+                updateChart(counts);
+                captureData(counts);
             }
 
-            function startSimulation() {
-                if (isRunning) return;
-                isRunning = true;
-                startBtn.textContent = "Pause";
-                startBtn.classList.remove("btn-success");
-                startBtn.classList.add("btn-warning");
-                runSimulationStep();
+            function updateR0Display(r0) {
+                r0Div.innerHTML = `Basic Reproduction Number (<span class="latex">R₀</span>) = <strong>${r0.toFixed(3)}</strong>`;
             }
 
-            function pauseSimulation() {
-                if (!isRunning) return;
-                isRunning = false;
-                startBtn.textContent = "Resume";
-                startBtn.classList.remove("btn-warning");
-                startBtn.classList.add("btn-success");
-                clearTimeout(simulationTimeout);
-            }
+            // --- CONTROLS AND EVENT HANDLERS ---
 
             function toggleSimulation() {
+                isRunning = !isRunning;
                 if (isRunning) {
-                    pauseSimulation();
+                    startBtn.textContent = "Pause";
+                    startBtn.classList.remove("btn-success");
+                    startBtn.classList.add("btn-warning");
+                    runSimulationStep();
                 } else {
-                    startSimulation();
+                    startBtn.textContent = "Resume";
+                    startBtn.classList.remove("btn-warning");
+                    startBtn.classList.add("btn-success");
+                    clearTimeout(simulationTimeout);
                 }
             }
 
             function resetSimulation() {
-                pauseSimulation();
+                if (isRunning) toggleSimulation(); // Pause if running
                 startBtn.textContent = "Start";
                 startBtn.classList.remove("btn-warning", "btn-success");
 
@@ -827,38 +948,56 @@
                 csvData = [];
                 currentParams = getParameters();
 
+                updateR0Display(currentParams.R0);
+
                 const simContainer = simulationCanvas.parentElement;
                 simulationCanvas.width = simContainer.clientWidth;
                 simulationCanvas.height = simContainer.clientHeight;
-                const chartContainer = chartCanvas.parentElement;
 
                 initializeAgents(currentParams);
                 initializeChart();
+                resetChart();
                 drawSimulation();
                 updateStats();
 
                 paramChangeNote.classList.add("hidden");
-                resetInputValidation();
             }
 
+            const CSV_HEADER = ["Day", ...StateLabels];
+            function captureData(counts) {
+                csvData.push([dayCounter, ...counts]);
+            }
+            function downloadCSV() {
+                if (csvData.length === 0) return alert("No data to download.");
+                let csvContent =
+                    "data:text/csv;charset=utf-8," +
+                    CSV_HEADER.join(",") +
+                    "\n" +
+                    csvData.map((e) => e.join(",")).join("\n");
+                const link = document.createElement("a");
+                link.setAttribute("href", encodeURI(csvContent));
+                link.setAttribute(
+                    "download",
+                    `seird_simulation_${new Date().toISOString()}.csv`,
+                );
+                link.click();
+            }
+
+            // --- INITIALIZATION ---
             startBtn.addEventListener("click", toggleSimulation);
             resetBtn.addEventListener("click", resetSimulation);
             downloadBtn.addEventListener("click", downloadCSV);
 
-            let hoveredAgent = null;
             simulationCanvas.addEventListener("mousemove", (event) => {
                 const rect = simulationCanvas.getBoundingClientRect();
-
                 const scaleX = simulationCanvas.width / rect.width;
                 const scaleY = simulationCanvas.height / rect.height;
                 const mouseX = (event.clientX - rect.left) * scaleX;
                 const mouseY = (event.clientY - rect.top) * scaleY;
 
-                hoveredAgent = null;
-
+                let hoveredAgent = null;
                 for (let i = agents.length - 1; i >= 0; i--) {
                     const agent = agents[i];
-
                     const dx = agent.x - mouseX;
                     const dy = agent.y - mouseY;
                     if (dx * dx + dy * dy <= AGENT_RADIUS * AGENT_RADIUS * 4) {
@@ -869,35 +1008,11 @@
 
                 if (hoveredAgent) {
                     tooltip.innerHTML = `
-                         <div><strong>State:</strong> ${StateLabels[hoveredAgent.state]}</div>
-                         <div><strong>Days in State:</strong> ${hoveredAgent.daysInState}</div>
-                         <div><strong>Age:</strong> ${hoveredAgent.age} (${hoveredAgent.ageGroup.label})</div>
-                         <div><strong>Contacts (Total):</strong> ${hoveredAgent.totalContacts}</div>
-                     `;
-
-                    const tooltipRect = tooltip.getBoundingClientRect();
-                    const margin = 10;
-                    let left = event.pageX + margin;
-                    let top = event.pageY + margin;
-
-                    if (left + tooltipRect.width > window.innerWidth) {
-                        left = event.pageX - tooltipRect.width - margin;
-                    }
-
-                    if (top + tooltipRect.height > window.innerHeight) {
-                        top = event.pageY - tooltipRect.height - margin;
-                    }
-
-                    if (left < 0) {
-                        left = margin;
-                    }
-
-                    if (top < 0) {
-                        top = margin;
-                    }
-
-                    tooltip.style.left = `${left}px`;
-                    tooltip.style.top = `${top}px`;
+                     <div><strong>State:</strong> ${StateLabels[hoveredAgent.state]}</div>
+                     <div><strong>Days in State:</strong> ${hoveredAgent.daysInState}</div>
+                     <div><strong>Age:</strong> ${hoveredAgent.age} (${hoveredAgent.ageGroup.label})</div>`;
+                    tooltip.style.left = `${event.pageX + 10}px`;
+                    tooltip.style.top = `${event.pageY + 10}px`;
                     tooltip.classList.remove("hidden");
                     tooltip.classList.add("visible");
                 } else {
@@ -905,58 +1020,17 @@
                     tooltip.classList.add("hidden");
                 }
             });
-            simulationCanvas.addEventListener("mouseleave", () => {
-                tooltip.classList.remove("visible");
-                tooltip.classList.add("hidden");
-            });
+            simulationCanvas.addEventListener("mouseleave", () =>
+                tooltip.classList.add("hidden"),
+            );
 
-            function handleParamChange(event) {
-                paramChangeNote.classList.remove("hidden");
-                validateInput(event.target);
-            }
+            parameterInputs.forEach((input) =>
+                input.addEventListener("input", () =>
+                    paramChangeNote.classList.remove("hidden"),
+                ),
+            );
 
-            function validateInput(inputElement) {
-                if (inputElement.type !== "number") return true;
-
-                const value = parseFloat(inputElement.value);
-                const min = parseFloat(inputElement.min);
-                const max = parseFloat(inputElement.max);
-                const name = inputElement.dataset.paramName || "Value";
-
-                let isValid = true;
-                if (isNaN(value)) {
-                    isValid = false;
-                } else if (value < min) {
-                    isValid = false;
-                } else if (value > max) {
-                    isValid = false;
-                }
-
-                if (!isValid) {
-                    inputElement.classList.add("input-error-state");
-                } else {
-                    inputElement.classList.remove("input-error-state");
-                }
-                return isValid;
-            }
-
-            function resetInputValidation() {
-                parameterInputs.forEach((input) => {
-                    input.classList.remove("input-error-state");
-                    validateInput(input);
-                });
-            }
-
-            parameterInputs.forEach((input) => {
-                input.addEventListener("input", handleParamChange);
-                validateInput(input);
-            });
-
-            function main() {
-                resetSimulation();
-            }
-
-            document.addEventListener("DOMContentLoaded", main);
+            document.addEventListener("DOMContentLoaded", resetSimulation);
         </script>
     </body>
 </html>
