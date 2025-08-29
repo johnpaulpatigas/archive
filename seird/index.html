@@ -244,14 +244,14 @@
                     <input
                         type="number"
                         id="populationSize"
-                        min="50"
-                        max="1000"
+                        min="10"
+                        max="100"
                         step="10"
                         class="input input-bordered w-full"
-                        value="200"
+                        value="50"
                     />
                     <div class="param-desc">
-                        Total number of agents (50-1000).
+                        Total number of agents (10-100).
                     </div>
                 </div>
                 <div>
@@ -281,7 +281,7 @@
                         max="50"
                         step="1"
                         class="input input-bordered w-full"
-                        value="10"
+                        value="30"
                     />
                     <div class="param-desc">
                         Average number of agents an infectious individual
@@ -651,12 +651,7 @@
                     return saneVal;
                 };
 
-                params.populationSize = parse(
-                    "populationSize",
-                    false,
-                    50,
-                    1000,
-                );
+                params.populationSize = parse("populationSize", false, 10, 100);
                 params.initialInfected = parse(
                     "initialInfected",
                     false,
